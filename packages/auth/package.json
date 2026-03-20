@@ -1,0 +1,24 @@
+{
+  "name": "@nooko-quotation-guardian/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@nooko-quotation-guardian/db": "workspace:*",
+    "@nooko-quotation-guardian/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@nooko-quotation-guardian/config": "workspace:*",
+    "typescript": "^5"
+  }
+}
