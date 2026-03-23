@@ -1,16 +1,39 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useQuotationStore } from '@/stores/quotation-store';
 import { useRiskEngine } from '@/hooks/useRiskEngine';
 import { RiskAlertPanel } from '@/components/RiskAlertPanel';
 import { OverrideDialog } from '@/components/OverrideDialog';
 import { getTemplatesByType } from '@q-check/construction-knowledge';
+import { parseQuotationPDF } from '@/lib/gemini-parse';
+import { logUncategorizedItems } from '@/lib/uncategorized-log';
+import type { ParsedItem } from '@/lib/gemini-parse';
 import type {
   TradeCategory,
   QuotationItem,
   RiskAlert,
   TemplateItem,
 } from '@q-check/construction-knowledge';
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
+function parsedItemToQuotationItem(
+  item: ParsedItem,
+  index: number
+): QuotationItem {
+  return {
+    id: `parsed-${Date.now()}-${index}`,
+    category: item.category,
+    itemName: item.itemName,
+    unit: item.unit,
+    quantity: item.quantity,
+    unitPrice: item.unitPrice,
+    totalPrice: item.totalPrice,
+    includes: null,
+    excludes: null,
+    specification: item.specification,
+  };
+}
 
 const CATEGORY_NAMES: Record<string, string> = {
   protection: '保護工程',
@@ -107,6 +130,7 @@ export default function QuotationPage() {
 
   const alerts = useRiskEngine(items, siteCondition, overrides);
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Local UI state
   const [selectedCategories, setSelectedCategories] = useState<Set<TradeCategory>>(
@@ -117,6 +141,11 @@ export default function QuotationPage() {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [dismissedAlertIds, setDismissedAlertIds] = useState<Set<string>>(new Set());
   const [overrideAlert, setOverrideAlert] = useState<RiskAlert | null>(null);
+
+  // PDF upload state
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [importedCount, setImportedCount] = useState(0);
 
   const toggleCategory = (cat: TradeCategory) => {
     setSelectedCategories((prev) => {
@@ -129,6 +158,46 @@ export default function QuotationPage() {
       return next;
     });
   };
+
+  const handleImportPDF = useCallback(
+    async (file: File) => {
+      if (!file.name.toLowerCase().endsWith('.pdf')) {
+        setUploadError('僅支援 PDF 格式檔案');
+        return;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        setUploadError('檔案大小超過 20MB 限制');
+        return;
+      }
+
+      setUploadError(null);
+      setUploading(true);
+      try {
+        const result = await parseQuotationPDF(file);
+        logUncategorizedItems(result.items);
+        const newItems = result.items.map((item, i) => parsedItemToQuotationItem(item, i));
+        addItems(newItems);
+        setImportedCount(newItems.length);
+        setSkeletonLoaded(true);
+        setLoadedCount(newItems.length);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : '解析失敗，請稍後再試';
+        setUploadError(message);
+      } finally {
+        setUploading(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    },
+    [addItems]
+  );
+
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleImportPDF(file);
+    },
+    [handleImportPDF]
+  );
 
   const handleLoadSkeleton = () => {
     const categories = Array.from(selectedCategories);
@@ -258,23 +327,51 @@ export default function QuotationPage() {
             })}
           </div>
 
-          <div>
+          <div className="flex items-center gap-3">
             {skeletonLoaded ? (
               <span className="inline-flex items-center px-3 py-1.5 rounded text-xs font-medium text-[#5A8A58] bg-[#F0F7F0]">
-                已帶入 {loadedCount} 項
+                已帶入 {loadedCount} 項{importedCount > 0 ? '（匯入）' : ''}
               </span>
             ) : (
-              <button
-                onClick={handleLoadSkeleton}
-                className="
-                  px-4 py-2 rounded text-sm font-medium
-                  border border-[#B8763E] text-[#B8763E]
-                  hover:bg-[#B8763E] hover:text-white
-                  transition-all duration-150 cursor-pointer
-                "
-              >
-                帶入工項骨架
-              </button>
+              <>
+                <button
+                  onClick={handleLoadSkeleton}
+                  disabled={uploading}
+                  className="
+                    px-4 py-2 rounded text-sm font-medium
+                    border border-[#B8763E] text-[#B8763E]
+                    hover:bg-[#B8763E] hover:text-white
+                    disabled:opacity-40 disabled:cursor-not-allowed
+                    transition-all duration-150 cursor-pointer
+                  "
+                >
+                  帶入工項骨架
+                </button>
+                <span className="text-xs text-[#B5B0AA]">或</span>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="
+                    px-4 py-2 rounded text-sm font-medium
+                    border border-[#8A8580] text-[#8A8580]
+                    hover:bg-[#8A8580] hover:text-white
+                    disabled:opacity-40 disabled:cursor-not-allowed
+                    transition-all duration-150 cursor-pointer
+                  "
+                >
+                  {uploading ? '解析中...' : '匯入報價單 (PDF)'}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  onChange={handleFileInput}
+                />
+              </>
+            )}
+            {uploadError && (
+              <span className="text-xs text-[#C44040]">{uploadError}</span>
             )}
           </div>
         </div>
@@ -319,7 +416,7 @@ export default function QuotationPage() {
           <button
             onClick={() =>
               navigate({
-                to: '/projects/$projectId/checklist',
+                to: '/projects/$projectId/risk-check',
                 params: { projectId: 'demo' },
               })
             }
@@ -330,7 +427,7 @@ export default function QuotationPage() {
               transition-all duration-150 cursor-pointer
             "
           >
-            完成確認
+            風險檢查
           </button>
         </div>
       </div>

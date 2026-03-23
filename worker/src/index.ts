@@ -33,7 +33,7 @@ export default {
       const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 60000);
+      const timeout = setTimeout(() => controller.abort(), 600000); // 600s = Gemini API server-side limit
 
       const geminiResponse = await fetch(geminiUrl, {
         method: 'POST',

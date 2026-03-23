@@ -44,6 +44,13 @@ const rootRoute = createRootRoute({
                 報價編輯
               </Link>
               <Link
+                to="/projects/$projectId/risk-check"
+                params={{ projectId: 'demo' }}
+                className="text-muted-foreground hover:text-foreground transition-colors py-1 border-b-2 border-transparent [&.active]:text-primary [&.active]:border-primary"
+              >
+                風險檢查
+              </Link>
+              <Link
                 to="/projects/$projectId/checklist"
                 params={{ projectId: 'demo' }}
                 className="text-muted-foreground hover:text-foreground transition-colors py-1 border-b-2 border-transparent [&.active]:text-primary [&.active]:border-primary"
@@ -56,12 +63,6 @@ const rootRoute = createRootRoute({
                 className="text-muted-foreground hover:text-foreground transition-colors py-1 border-b-2 border-transparent [&.active]:text-primary [&.active]:border-primary"
               >
                 匯出
-              </Link>
-              <Link
-                to="/upload"
-                className="text-muted-foreground hover:text-foreground transition-colors py-1 border-b-2 border-transparent [&.active]:text-primary [&.active]:border-primary"
-              >
-                上傳檢查
               </Link>
             </nav>
           </div>
@@ -88,7 +89,7 @@ import SiteConditionPage from './pages/SiteConditionPage'
 import QuotationPage from './pages/QuotationPage'
 import ChecklistPage from './pages/ChecklistPage'
 import ExportPage from './pages/ExportPage'
-import UploadCheckPage from './pages/UploadCheckPage'
+import RiskCheckPage from './pages/RiskCheckPage'
 
 // -- Project routes --
 const projectIndexRoute = createRoute({
@@ -115,10 +116,10 @@ const projectExportRoute = createRoute({
   component: ExportPage,
 })
 
-const uploadRoute = createRoute({
+const projectRiskCheckRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/upload',
-  component: UploadCheckPage,
+  path: '/projects/$projectId/risk-check',
+  component: RiskCheckPage,
 })
 
 // -- Route tree --
@@ -128,7 +129,7 @@ const routeTree = rootRoute.addChildren([
   projectQuotationRoute,
   projectChecklistRoute,
   projectExportRoute,
-  uploadRoute,
+  projectRiskCheckRoute,
 ])
 
 const hashHistory = createHashHistory()
