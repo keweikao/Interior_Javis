@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@q-check/construction-knowledge": ["../../packages/construction-knowledge/src"]
+    }
+  }
+}

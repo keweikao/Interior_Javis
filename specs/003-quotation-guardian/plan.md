@@ -1,15 +1,16 @@
-# 技術架構計畫 — Nooko 報價防呆守衛
+# 技術架構計畫 — Q-Check
 
-> **版本**: 1.0
-> **日期**: 2026-03-05
+> **版本**: 3.0
+> **日期**: 2026-03-23
 > **技術棧**: Better-T Stack
+> **定位**: 設計公司風險管理決策系統
 
 ---
 
 ## 一、技術棧選型（Better-T Stack）
 
 ```bash
-bun create better-t-stack@latest nooko-quotation-guardian \
+bun create better-t-stack@latest q-check \
   --runtime bun \
   --frontend tanstack-router \
   --backend hono \
@@ -30,247 +31,355 @@ bun create better-t-stack@latest nooko-quotation-guardian \
 | **Backend** | Hono | 輕量、邊緣運算友好、middleware 生態豐富 |
 | **API** | tRPC | 前後端 type-safe，報價資料結構複雜時很有價值 |
 | **Database** | PostgreSQL (Neon) | 報價是結構化關聯資料、Neon serverless 免管 infra |
-| **ORM** | Drizzle | 輕量、type-safe、SQL-like，對計算邏輯更直覺 |
-| **Auth** | Better-Auth | 內建、支援 organization/team（多租戶） |
+| **ORM** | Drizzle | 輕量、type-safe、SQL-like |
+| **Auth** | Better-Auth | 內建、MVP 先用 email+password |
 | **Monorepo** | Turborepo | 管理 web + server + shared packages |
-| **Lint** | Biome | 比 ESLint+Prettier 快 35x |
+| **Lint** | Biome | 快速 |
 
 ### 額外整合
 
 | 需求 | 技術 | 說明 |
 |------|------|------|
-| **UI 元件** | shadcn/ui + Tailwind CSS 4 | 美觀、可客製、accessibility |
-| **表格** | TanStack Table | 報價單需要強大的表格功能 |
-| **檔案解析** | xlsx (SheetJS) | 解析 Excel 報價單 |
-| **AI 推理** | Google Gemini API (via @google/genai) | 保留現有 Gemini 整合，改用 TS SDK |
-| **即時通知** | SSE / WebSocket | 審核進度即時更新 |
-| **PDF 產出** | @react-pdf/renderer | 產出防呆報告 PDF |
+| **UI 元件** | shadcn/ui + Tailwind CSS 4 | 美觀、可客製 |
+| **表格** | TanStack Table | 報價單編輯器核心（inline editing） |
+| **PDF 產出** | @react-pdf/renderer | 產出格式化報價單 PDF |
+
+### MVP 不需要的依賴
+
+| 項目 | 原因 |
+|------|------|
+| xlsx (SheetJS) | 不需要解析 Excel |
+| Google Gemini API | Phase 1 不做 AI |
+| SSE / WebSocket | Client-side 引擎不需要 |
 
 ---
 
 ## 二、專案結構（Monorepo）
 
 ```
-nooko-quotation-guardian/
-├── .env                               # 環境變數（DB URL, Auth secrets）
-├── package.json                       # Root workspace
-├── tsconfig.json
-├── turbo.json                         # Turborepo 設定
-├── biome.json                         # Biome lint/format 設定
-├── bunfig.toml                        # Bun 設定
+q-check/
+├── .env
+├── package.json
+├── turbo.json
+├── biome.json
 │
 ├── apps/
-│   └── web/                           # React + TanStack Router 前端 (Vite SPA)
-│       ├── package.json
-│       ├── vite.config.ts
-│       ├── index.html
-│       ├── components.json            # shadcn/ui 設定
+│   └── web/
 │       └── src/
-│           ├── main.tsx
-│           ├── index.css
-│           ├── routes/                # File-based routing (TanStack Router)
+│           ├── routes/
 │           │   ├── __root.tsx
 │           │   ├── index.tsx                    # Landing / Dashboard
-│           │   ├── login.tsx                    # Better-Auth 登入頁
-│           │   ├── dashboard.tsx                # Better-Auth 使用者頁
+│           │   ├── login.tsx
 │           │   ├── projects/
 │           │   │   ├── index.tsx                # 專案列表
 │           │   │   └── $projectId/
-│           │   │       ├── index.tsx            # 專案概覽
-│           │   │       ├── upload.tsx           # 上傳報價單
-│           │   │       ├── review.tsx           # 防呆審核結果
-│           │   │       └── rules.tsx            # 防呆規則管理
-│           │   └── settings/
-│           │       ├── index.tsx                # 帳號設定
-│           │       └── team.tsx                 # 團隊管理
+│           │   │       ├── index.tsx            # 專案概覽 + 現場條件
+│           │   │       ├── budget-check.tsx     # 🆕 Layer 0：預算可行性快篩
+│           │   │       ├── quotation.tsx        # 🔑 Layer 1+2：報價編輯器 + 風險提醒
+│           │   │       ├── report.tsx           # 🆕 Layer 3：完成報告（含風險摘要）
+│           │   │       └── export.tsx           # PDF 預覽 & 匯出
+│           │   └── settings.tsx
+│           │
 │           ├── components/
-│           │   ├── quotation/                   # 報價單相關元件
-│           │   │   ├── QuotationTable.tsx       # 報價單表格（TanStack Table）
-│           │   │   ├── UploadDropzone.tsx       # 檔案上傳區
-│           │   │   └── ReviewReport.tsx         # 審核報告卡片
-│           │   ├── rules/                       # 規則相關元件
-│           │   │   ├── RuleCard.tsx
-│           │   │   └── RuleFeedback.tsx         # ✅❌✏️ 回饋按鈕
-│           │   ├── sign-in-form.tsx             # Better-Auth 登入表單
-│           │   ├── sign-up-form.tsx             # Better-Auth 註冊表單
-│           │   ├── user-menu.tsx                # Better-Auth 使用者選單
-│           │   └── ui/                          # shadcn/ui 元件
+│           │   ├── quotation/
+│           │   │   ├── QuotationEditor.tsx      # 🔑 智慧表格主元件
+│           │   │   ├── ItemRow.tsx              # 工項行（inline editing + 含/不含欄位）
+│           │   │   ├── CategorySection.tsx      # 工種分類區塊
+│           │   │   ├── TemplateLibrary.tsx      # 工項範本庫側欄
+│           │   │   ├── RiskAlertPanel.tsx       # 🆕 右側風險提醒面板（不打斷操作）
+│           │   │   ├── OverrideDialog.tsx       # 🆕 Override 對話框（填寫覆寫原因）
+│           │   │   └── CompletionReport.tsx     # 完成報告（含 Override 清單）
+│           │   ├── project/
+│           │   │   ├── SiteConditionForm.tsx    # 現場條件表單
+│           │   │   ├── BudgetChecker.tsx        # 🆕 預算可行性快篩元件
+│           │   │   └── ProjectCard.tsx
+│           │   ├── export/
+│           │   │   └── QuotationPDF.tsx         # PDF 報價單模板（含/不含寫明）
+│           │   └── ui/                          # shadcn/ui
+│           │
+│           ├── hooks/
+│           │   ├── useRiskEngine.ts             # 🔑 Client-side 風險引擎 hook
+│           │   └── useQuotationStore.ts         # 報價單狀態管理
+│           │
 │           ├── lib/
-│           │   ├── auth-client.ts               # Better-Auth client
+│           │   ├── auth-client.ts
 │           │   └── utils.ts
 │           └── utils/
-│               └── trpc.ts                      # tRPC client setup
+│               └── trpc.ts
 │
-├── server/                            # Hono 後端 (頂層 workspace)
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── tsdown.config.ts               # Build 設定
+├── server/
 │   └── src/
-│       ├── index.ts                    # Hono server entry point
-│       └── services/                   # 業務邏輯服務
-│           ├── excel-parser.ts         # Excel 報價單解析
-│           ├── review-engine.ts        # 三大防呆關卡引擎
-│           ├── rule-engine.ts          # 規則比對引擎
-│           ├── gemini.ts               # Gemini AI 推理
-│           └── quantity-estimator.ts   # 數量合理性估算
+│       ├── index.ts
+│       └── services/
+│           └── pdf-export.ts
 │
 ├── packages/
-│   ├── api/                           # tRPC Router 定義
-│   │   ├── package.json
+│   ├── api/
 │   │   └── src/
-│   │       ├── index.ts               # tRPC app handler (Hono 整合)
-│   │       ├── context.ts             # tRPC context
+│   │       ├── index.ts
+│   │       ├── context.ts
 │   │       └── routers/
-│   │           ├── index.ts           # Root router
-│   │           ├── project.ts         # 專案 CRUD
-│   │           ├── quotation.ts       # 報價單上傳/解析
-│   │           ├── review.ts          # 防呆審核
-│   │           ├── rule.ts            # 規則 CRUD
-│   │           └── feedback.ts        # 老手回饋
+│   │           ├── index.ts
+│   │           ├── project.ts         # 專案 CRUD + 現場條件 + 預算檢查
+│   │           └── quotation.ts       # 報價單 CRUD + 工項 CRUD + Override 記錄
 │   │
-│   ├── auth/                          # Better-Auth 伺服器設定
-│   │   ├── package.json
+│   ├── auth/
 │   │   └── src/
-│   │       └── index.ts               # Auth configuration (Drizzle adapter)
+│   │       └── index.ts
 │   │
-│   ├── db/                            # Drizzle ORM + Schema
-│   │   ├── package.json
-│   │   ├── drizzle.config.ts          # Drizzle config for Postgres
+│   ├── db/
 │   │   └── src/
-│   │       ├── index.ts               # Drizzle client (Neon serverless driver)
-│   │       ├── seed.ts                # 種子資料（基礎防呆規則）
+│   │       ├── index.ts
+│   │       ├── seed.ts                # 工項範本 + 含/不含標準定義
 │   │       └── schema/
-│   │           ├── index.ts           # Schema barrel export
-│   │           ├── auth.ts            # Better-Auth 的 auth tables
-│   │           ├── project.ts         # 專案、現場條件
-│   │           ├── quotation.ts       # 報價單、工項
-│   │           ├── review.ts          # 審核記錄、發現
-│   │           ├── rule.ts            # 防呆規則
-│   │           └── feedback.ts        # 老手回饋
+│   │           ├── index.ts
+│   │           ├── auth.ts
+│   │           ├── project.ts         # 專案、現場條件（含預算）
+│   │           ├── quotation.ts       # 報價單、工項（含 includes/excludes、override）
+│   │           └── template.ts        # 工項範本（含標準含/不含定義）
 │   │
-│   ├── env/                           # 環境變數驗證
+│   ├── env/
 │   │   └── src/
 │   │       ├── server.ts
 │   │       └── web.ts
 │   │
-│   ├── config/                        # 共用 TypeScript config
+│   ├── config/
 │   │   └── tsconfig.base.json
 │   │
-│   └── construction-knowledge/        # 工程知識庫（從現有 Python 移植）
+│   └── construction-knowledge/        # 🔑 風險知識庫（前後端共用 pure TS）
 │       ├── package.json
 │       └── src/
-│           ├── dependencies.ts        # 工序相依關係
-│           ├── site-constraints.ts    # 現場限制條件
-│           ├── quantity-formulas.ts   # 數量計算公式
-│           └── trade-mapping.ts       # 工種對應表
+│           ├── index.ts
+│           ├── types.ts               # Rule, RiskAlert, Override 等型別
+│           ├── engine.ts              # 🔑 風險引擎核心（pure function）
+│           ├── budget.ts              # 🆕 預算可行性計算（Layer 0）
+│           ├── rules/
+│           │   ├── dependency.ts      # 漏項規則（工序連動）
+│           │   ├── site-conflict.ts   # 現場衝突規則
+│           │   ├── quantity.ts        # 數量異常規則
+│           │   ├── clarity.ts         # 🆕 描述清晰度規則（認知落差）
+│           │   └── pricing.ts         # 🆕 單價行情規則
+│           ├── templates/
+│           │   ├── demolition.ts
+│           │   ├── plumbing.ts
+│           │   ├── masonry.ts
+│           │   ├── carpentry.ts
+│           │   ├── painting.ts
+│           │   └── index.ts
+│           └── explanations.ts        # 每條規則的「為什麼」解釋
 ```
 
 ---
 
-## 三、核心資料流
+## 三、核心資料流（四層架構）
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        使用者操作                             │
-│                                                             │
-│  1. 填寫現場條件 ──→  2. 上傳報價單(Excel) ──→  3. 點擊「審核」│
-└───────────┬─────────────────┬──────────────────┬────────────┘
-            │                 │                  │
-            ▼                 ▼                  ▼
-┌───────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│  site_conditions │  │  excel-parser.ts  │  │  review-engine.ts │
-│  → DB 存儲      │  │  → 解析為結構化   │  │  → 執行三大關卡   │
-│                 │  │    工項資料       │  │                  │
-└───────────────┘  └──────────────────┘  └──────┬───────────┘
-                                                 │
-                          ┌──────────────────────┤
-                          │                      │
-                          ▼                      ▼
-                 ┌─────────────────┐   ┌──────────────────┐
-                 │  rule-engine.ts  │   │  gemini.ts       │
-                 │  (確定性規則比對) │   │  (AI 模糊推理)   │
-                 └────────┬────────┘   └────────┬─────────┘
-                          │                      │
-                          ▼                      ▼
-                 ┌─────────────────────────────────────────┐
-                 │           ReviewReport                   │
-                 │  🔴 紅燈：致命漏項 (must fix)             │
-                 │  🟡 黃燈：疑似異常 (should check)         │
-                 │  🟢 綠燈：通過 (ok)                      │
-                 │  📊 信心分數：85%                        │
-                 └──────────────────┬──────────────────────┘
-                                    │
-                                    ▼
-                 ┌─────────────────────────────────────────┐
-                 │          老手回饋迴路                      │
-                 │  ✅ 正確 → 規則權重 +1                    │
-                 │  ❌ 誤報 → 標記例外                      │
-                 │  ✏️ 調整 → 新增/修改規則                  │
-                 └─────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│  設計師操作流程                                                    │
+│                                                                   │
+│  1. 建專案    2. 填現場條件     3. 預算快篩      4. 開報價單        │
+│     + 預算                                                        │
+└────┬──────────────┬──────────────┬────────────────┬───────────────┘
+     │              │              │                │
+     ▼              ▼              ▼                ▼
+┌─────────┐  ┌───────────┐  ┌──────────────┐  ┌──────────────────┐
+│ project │  │   site    │  │ budget.ts    │  │ QuotationEditor  │
+│ → DB    │  │ condition │  │ (pure func)  │  │ (TanStack Table) │
+│         │  │ → DB      │  │              │  │                  │
+│         │  │ + 預算     │  │ 輸出：        │  │ 骨架帶入 → 刪改  │
+└─────────┘  └─────┬─────┘  │ ⚠️ 預算不合理 │  └───────┬──────────┘
+                   │        │ ✅ 預算合理    │          │
+                   │        └──────────────┘          │
+                   │                                   │
+                   │     每次工項 增/刪/改/Override      │
+                   │              │                    │
+                   ▼              ▼                    │
+            ┌────────────────────────────┐             │
+            │  useRiskEngine (Hook)      │             │
+            │  engine.ts (pure function) │             │
+            │                            │             │
+            │  輸入：                     │             │
+            │  • items + includes/excludes│             │
+            │  • siteCondition + budget  │             │
+            │  • rules (5 categories)    │             │
+            │                            │             │
+            │  輸出：                     │             │
+            │  • riskAlerts[]            │             │
+            │  • clarityWarnings[]  🆕   │             │
+            │  • overrideSummary[]  🆕   │             │
+            └──────────┬─────────────────┘             │
+                       │                               │
+                       ▼                               │
+            ┌──────────────────────┐                   │
+            │  RiskAlertPanel      │                   │
+            │  （右側，不打斷操作）  │                   │
+            │                      │                   │
+            │  🔴 漏項             │                   │
+            │  🟡 描述模糊         │                   │
+            │  🟡 數量異常         │                   │
+            │  💰 單價偏低         │                   │
+            │                      │                   │
+            │  每個提醒：           │                   │
+            │  [接受] [Override]   │───────────────────┘
+            │         ↓            │
+            │  OverrideDialog      │
+            │  「填寫覆寫原因」     │
+            └──────────┬───────────┘
+                       │
+                       ▼
+            ┌──────────────────────────────┐
+            │  CompletionReport            │
+            │                              │
+            │  📋 Checklist 確認            │
+            │  📊 風險摘要（含 Override 清單）│
+            │  📄 PDF 報價單匯出            │
+            │     （含/不含欄位寫明）        │
+            │  📊 內部風險報告（不給客戶）    │
+            └──────────────────────────────┘
 ```
 
 ---
 
-## 四、與現有程式碼的關係
+## 四、核心元件設計
 
-### 保留並移植的資產
+### 4.1 風險引擎（`construction-knowledge/engine.ts`）
 
-| 現有 Python 程式 | 新 TypeScript 對應 | 說明 |
-|---|---|---|
-| `construction_translator.py` 的 dependencies 概念 | `packages/construction-knowledge/dependencies.ts` | 工序相依關係是防呆關卡 1 的核心 |
-| `ConstructionItem.risks_if_skip` | `packages/shared/types/rule.ts` | 轉為防呆規則的「後果描述」 |
-| `_translate_tile_to_wood_floor()` 等範例 | `db/seed.ts` | 轉為初始規則種子資料 |
-| `gemini_service.py` 的 Vertex AI 整合 | `services/gemini.ts` | 改用 `@google/genai` TS SDK |
-| Firestore 的 project model | Drizzle PostgreSQL schema | 結構化資料更適合 SQL |
+**設計原則**：Pure function、無 side effect、前後端共用、100% 可測試
 
-### 不保留的部分
+```typescript
+// 引擎 API 簡述
 
-| 現有程式 | 原因 |
-|---|---|
-| `client_manager_agent.py` | B2C 對話流程，新方向不需要 |
-| `designer_agent.py` | 設計建議功能，不在 MVP scope |
-| `image_generation_service.py` | 渲染圖功能，不在 MVP scope |
-| `web-service/` React 前端 | 全部用 Better-T Stack 重建 |
-| GCP Cloud Build/Run 部署 | 改用更簡單的部署方式（Vercel/Cloudflare） |
+interface RiskEngineInput {
+  items: QuotationItem[];           // 含 includes/excludes
+  siteCondition: SiteCondition;     // 含 budget
+  rules: RiskRule[];
+  overrides: Override[];            // 已 override 的提醒
+}
+
+interface RiskAlert {
+  id: string;
+  severity: "critical" | "warning" | "info";
+  category: "dependency" | "site_conflict" | "quantity" | "clarity" | "pricing";
+  title: string;
+  why: string;                      // 培養底氣的關鍵
+  suggestion: string;
+  relatedItemIds: string[];
+  suggestedItem?: TemplateItem;
+  canOverride: boolean;             // critical 級別不可 override
+}
+
+interface Override {
+  alertId: string;
+  reason: string;                   // 設計師填寫的覆寫原因
+  overriddenBy: string;             // user id
+  overriddenAt: Date;
+}
+
+// Pure function
+function runRiskEngine(input: RiskEngineInput): {
+  alerts: RiskAlert[];              // 風險提醒
+  clarityWarnings: RiskAlert[];     // 描述清晰度警告
+  checklist: ChecklistItem[];       // 動態 checklist
+  overrideSummary: Override[];      // Override 摘要（供資深覆核）
+};
+```
+
+### 4.2 預算可行性快篩（`construction-knowledge/budget.ts`）
+
+```typescript
+interface BudgetCheckInput {
+  totalArea: number;               // 坪數
+  buildingType: string;            // 新成屋/中古屋/老屋
+  buildingAge: number;             // 屋齡
+  scope: string[];                 // 要做的工種大類
+  clientBudget: number;            // 客戶預算
+}
+
+interface BudgetCheckResult {
+  feasible: boolean;
+  estimatedRange: { min: number; max: number };
+  gap: number | null;              // 預算缺口
+  message: string;                 // 人類可讀的建議
+  riskLevel: "safe" | "tight" | "unrealistic";
+}
+
+function checkBudgetFeasibility(input: BudgetCheckInput): BudgetCheckResult;
+```
+
+### 4.3 風險提醒面板（`RiskAlertPanel.tsx`）
+
+- **位置**：編輯器右側（不打斷操作）
+- **分層顯示**：
+  - 🔴 Critical：紅色卡片，置頂，不可 Override
+  - 🟡 Warning：黃色卡片，可 Override
+  - 🔵 Info：收合，點開才看
+- 每張卡片包含：標題 + 「為什麼」+ 建議 + [接受] / [Override] 按鈕
+
+### 4.4 Override 對話框（`OverrideDialog.tsx`）
+
+- 點擊 Override 後彈出
+- 必填：覆寫原因（一句話）
+- 選填：備註
+- 送出後：該提醒標記為已覆寫，不再重複顯示
+- 所有 Override 記錄彙整到完成報告
+
+### 4.5 工項行（`ItemRow.tsx`）
+
+每個工項行包含：
+- 工種分類 | 工項名稱 | 單位 | 數量 | 單價 | 小計
+- 規格說明（展開欄）
+- **含/不含**（展開欄）— 解決認知落差的核心
+  - ✅ 含：五金安裝、表面處理
+  - ❌ 不含：特殊五金、玻璃
+- 備註
 
 ---
 
 ## 五、開發階段
 
-### Phase 1：骨架建立（第 1 週）
+### Phase 1：骨架 + 預算快篩（第 1 週）
 
 - [ ] 用 Better-T Stack CLI 產生專案
 - [ ] 設定 Neon PostgreSQL
 - [ ] 建立 Drizzle schema 並 migrate
 - [ ] Better-Auth 設定（email + password）
-- [ ] 基本 CRUD：專案、報價單
+- [ ] 基本 CRUD：專案、現場條件（含預算）
+- [ ] `budget.ts` 預算可行性計算
+- [ ] `BudgetChecker.tsx` 預算快篩頁面
 
-### Phase 2：核心引擎（第 2-3 週）
+### Phase 2：報價編輯器 + 風險引擎（第 2-3 週）
 
-- [ ] Excel 報價單解析器
-- [ ] 現場條件輸入表單
-- [ ] 關卡 1：工序連動檢查（規則引擎）
-- [ ] 關卡 2：物理條件檢查
-- [ ] 關卡 3：數量比例檢查
-- [ ] 審核報告頁面（紅黃綠燈）
+- [ ] `construction-knowledge` package
+  - [ ] 萃取防呆規則（含漏項、描述清晰度、數量、現場衝突、單價）
+  - [ ] 每條規則加上「為什麼」解釋
+  - [ ] 風險引擎 pure function
+  - [ ] 單元測試
+- [ ] 工項範本庫（含標準「含/不含」定義）
+- [ ] 報價單智慧表格編輯器
+  - [ ] TanStack Table + inline editing
+  - [ ] 含/不含欄位
+  - [ ] 工種分類分區顯示
+  - [ ] 骨架帶入（選案件類型 + 勾工種 → 一次帶入）
+- [ ] `RiskAlertPanel.tsx` 右側風險面板
+- [ ] `OverrideDialog.tsx` Override 機制
+- [ ] `useRiskEngine` hook
 
-### Phase 3：AI 整合（第 3-4 週）
+### Phase 3：完成報告 + PDF 輸出（第 3-4 週）
 
-- [ ] Gemini API 整合（TS SDK）
-- [ ] AI 輔助模糊推理（規則引擎不確定時）
-- [ ] AI 產出修正建議文字
+- [ ] 完成報告頁面
+  - [ ] Checklist 確認
+  - [ ] 風險摘要（含 Override 清單）
+  - [ ] 內部風險報告
+- [ ] PDF 報價單匯出
+  - [ ] 含/不含欄位寫明
+  - [ ] 排版格式
 
-### Phase 4：回饋迴路（第 4-5 週）
+### Phase 4：閉門測試（第 4-5 週）
 
-- [ ] 老手回饋介面（✅❌✏️）
-- [ ] 回饋 → 規則自動新增/調權
-- [ ] 規則管理後台
-
-### Phase 5：閉門測試（第 5-6 週）
-
-- [ ] 10 份歷史報價單測試
-- [ ] 調教 AI 與規則閾值
+- [ ] 用歷史案例手動輸入測試
+- [ ] 調教規則閾值 + 預算公式
 - [ ] 修正 false positive / false negative
+- [ ] 與合作方設計師實際試用
 
 ---
 
@@ -278,8 +387,30 @@ nooko-quotation-guardian/
 
 | 元件 | 平台 | 說明 |
 |------|------|------|
-| Web 前端 | Vercel | React SPA，自動 CI/CD |
-| API 後端 | Vercel Serverless / Railway | Hono 支援多平台 |
-| Database | Neon PostgreSQL | Serverless，自動 scaling |
-| AI | Google Vertex AI (Gemini) | 直接 API call |
-| 檔案儲存 | Vercel Blob / R2 | 上傳的 Excel 檔案 |
+| Web 前端 | Vercel | React SPA |
+| API 後端 | Vercel Serverless / Railway | Hono |
+| Database | Neon PostgreSQL | Serverless |
+
+---
+
+## 七、未來擴展（正確路徑）
+
+```
+Phase 1 (MVP): 結構化報價系統（不做 AI）
+    → 用戶使用自然產生乾淨資料
+               ↓
+Phase 2: AI 整理舊資料，擴充工項與漏項庫
+               ↓
+Phase 3: AI 風險預測與報價建議
+```
+
+| 功能 | 優先級 | 階段 |
+|------|:---:|:---:|
+| 資深覆核儀表板（只看 30% 清單） | P1 | Post-MVP |
+| 老手回饋迴路（✅❌✏️） | P1 | Post-MVP |
+| 多組織/團隊管理 | P1 | SaaS 化 |
+| AI 整理舊報價資料 | P2 | Phase 2 |
+| 規則管理後台 | P2 | Phase 2 |
+| AI 風險預測 | P3 | Phase 3 |
+| 上傳舊報價單審核 | P3 | Phase 3 |
+| 同業比價/市場行情 | P3 | Phase 3 |

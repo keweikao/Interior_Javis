@@ -1,0 +1,40 @@
+import type { TemplateItem } from "../types.js";
+
+export const cleaningTemplates: TemplateItem[] = [
+  {
+    id: "tpl-cleaning-001",
+    category: "cleaning",
+    itemName: "粗清",
+    unit: "式",
+    description: "大型廢料、建材清運",
+    defaultIncludes: "施工廢料清理、大型垃圾清運",
+    defaultExcludes: "細清",
+    applicableTypes: ["new_build", "mid_age", "old_renovation"],
+    commonlyMissed: false,
+    sortOrder: 1,
+  },
+  {
+    id: "tpl-cleaning-002",
+    category: "cleaning",
+    itemName: "細清",
+    unit: "坪",
+    description: "全室清潔、除膠、擦拭",
+    defaultIncludes: "全室清潔、窗溝清理、除膠、地板擦拭",
+    defaultExcludes: "除甲醛",
+    applicableTypes: ["new_build", "mid_age", "old_renovation"],
+    commonlyMissed: true,
+    sortOrder: 2,
+  },
+  {
+    id: "tpl-cleaning-003",
+    category: "cleaning",
+    itemName: "除甲醛",
+    unit: "式",
+    description: "新裝修空氣淨化，建議施作",
+    defaultIncludes: "除甲醛藥劑施作",
+    defaultExcludes: "後續空氣品質檢測",
+    applicableTypes: ["new_build", "mid_age", "old_renovation"],
+    commonlyMissed: false,
+    sortOrder: 3,
+  },
+];

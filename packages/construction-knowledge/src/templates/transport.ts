@@ -1,0 +1,40 @@
+import type { TemplateItem } from "../types.js";
+
+export const transportTemplates: TemplateItem[] = [
+  {
+    id: "tpl-transport-001",
+    category: "transport",
+    itemName: "建材搬運（樓層加價）",
+    unit: "式",
+    description: "無電梯時每層加價15%-25%",
+    defaultIncludes: "建材人力搬運至施工樓層",
+    defaultExcludes: "吊車費用",
+    applicableTypes: ["new_build", "mid_age", "old_renovation", "partial"],
+    commonlyMissed: true,
+    sortOrder: 1,
+  },
+  {
+    id: "tpl-transport-002",
+    category: "transport",
+    itemName: "大型建材吊掛",
+    unit: "次",
+    description: "高樓層無電梯時需吊車搬運大型建材",
+    defaultIncludes: "吊車租用、吊掛作業",
+    defaultExcludes: "道路使用許可",
+    applicableTypes: ["new_build", "mid_age", "old_renovation"],
+    commonlyMissed: true,
+    sortOrder: 2,
+  },
+  {
+    id: "tpl-transport-003",
+    category: "transport",
+    itemName: "廢棄物清運",
+    unit: "車",
+    description: "3.5噸車清運工程廢料",
+    defaultIncludes: "廢料裝車、清運至合法棄置場",
+    defaultExcludes: "樓層搬運費",
+    applicableTypes: ["new_build", "mid_age", "old_renovation", "partial"],
+    commonlyMissed: true,
+    sortOrder: 3,
+  },
+];

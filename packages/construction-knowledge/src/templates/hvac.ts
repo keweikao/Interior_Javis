@@ -1,0 +1,40 @@
+import type { TemplateItem } from "../types.js";
+
+export const hvacTemplates: TemplateItem[] = [
+  {
+    id: "tpl-hvac-001",
+    category: "hvac",
+    itemName: "分離式冷氣安裝",
+    unit: "台",
+    description: "壁掛/吊隱/嵌入式安裝",
+    defaultIncludes: "室內機安裝、標配冷媒管(5m)、控制線",
+    defaultExcludes: "室外機架、洗洞、排水管、220V專用迴路、超出標配管線",
+    applicableTypes: ["new_build", "mid_age", "old_renovation", "partial"],
+    commonlyMissed: false,
+    sortOrder: 1,
+  },
+  {
+    id: "tpl-hvac-002",
+    category: "hvac",
+    itemName: "冷氣排水管",
+    unit: "組",
+    description: "冷凝水排放管，常漏報項目",
+    defaultIncludes: "排水管配管",
+    defaultExcludes: "排水器（吊隱式需加購）",
+    applicableTypes: ["new_build", "mid_age", "old_renovation", "partial"],
+    commonlyMissed: true,
+    sortOrder: 2,
+  },
+  {
+    id: "tpl-hvac-003",
+    category: "hvac",
+    itemName: "全熱交換器安裝",
+    unit: "台",
+    description: "含配管，需洗洞2-4個",
+    defaultIncludes: "全熱交換器安裝、配管",
+    defaultExcludes: "洗洞、電源迴路、天花板維修孔",
+    applicableTypes: ["new_build", "mid_age", "old_renovation"],
+    commonlyMissed: false,
+    sortOrder: 3,
+  },
+];

@@ -67,3 +67,9 @@ q/
 
 .gemini/
 gha-creds-*.json
+
+# Q-Check
+apps/web/dist/
+apps/web/node_modules/
+.wrangler/
+.vercel/

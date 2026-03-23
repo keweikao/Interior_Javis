@@ -1,0 +1,40 @@
+import type { TemplateItem } from "../types.js";
+
+export const waterproofingTemplates: TemplateItem[] = [
+  {
+    id: "tpl-waterproofing-001",
+    category: "waterproofing",
+    itemName: "浴室防水工程",
+    unit: "間",
+    description: "至少2層防水塗料，含地面及牆面",
+    defaultIncludes: "防水底層處理、防水塗料施作（一底二塗）、牆面防水（淋浴區至少180cm）",
+    defaultExcludes: "試水測試",
+    applicableTypes: ["new_build", "mid_age", "old_renovation"],
+    commonlyMissed: true,
+    sortOrder: 1,
+  },
+  {
+    id: "tpl-waterproofing-002",
+    category: "waterproofing",
+    itemName: "試水測試",
+    unit: "間",
+    description: "蓄水測試確認無滲漏，不可省略",
+    defaultIncludes: "蓄水測試、觀察記錄",
+    defaultExcludes: "防水修補（若測試未通過）",
+    applicableTypes: ["new_build", "mid_age", "old_renovation"],
+    commonlyMissed: true,
+    sortOrder: 2,
+  },
+  {
+    id: "tpl-waterproofing-003",
+    category: "waterproofing",
+    itemName: "陽台防水",
+    unit: "坪",
+    description: "外推或有漏水疑慮時施作",
+    defaultIncludes: "防水底層處理、防水塗料施作",
+    defaultExcludes: "磁磚鋪貼",
+    applicableTypes: ["mid_age", "old_renovation"],
+    commonlyMissed: false,
+    sortOrder: 3,
+  },
+];
