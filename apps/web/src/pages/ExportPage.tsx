@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { pdf } from '@react-pdf/renderer';
-import { Button } from '@/components/ui/button';
 import { useQuotationStore } from '@/stores/quotation-store';
 import { useRiskEngine } from '@/hooks/useRiskEngine';
 import { QuotationPDF } from '@/components/QuotationPDF';
 import { RiskReportPDF } from '@/components/RiskReportPDF';
-import type { TradeCategory } from '@q-check/construction-knowledge';
 import {
   dependencyRules,
   siteConflictRules,
@@ -37,7 +35,6 @@ export default function ExportPage() {
 
   // Stats
   const validItems = items.filter((i) => !!i.itemName);
-  const categories = new Set<TradeCategory>(validItems.map((i) => i.category));
   const warningAlerts = alerts.filter(
     (a) => a.severity === 'warning' || a.severity === 'critical'
   );
@@ -107,46 +104,40 @@ export default function ExportPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <h2 className="text-xl font-bold">匯出文件</h2>
-
-      {/* Summary card */}
-      <div className="rounded-lg border bg-card p-6 space-y-3">
-        <h3 className="font-semibold text-base">報價摘要</h3>
-        <div className="grid grid-cols-2 gap-y-2 text-sm">
-          <div className="text-muted-foreground">案場</div>
-          <div>{projectName}</div>
-
-          <div className="text-muted-foreground">類型</div>
-          <div>{PROJECT_TYPE_LABELS[projectType] ?? projectType}</div>
-
-          <div className="text-muted-foreground">坪數</div>
-          <div>{siteCondition.totalArea} 坪</div>
-
-          <div className="text-muted-foreground">工項數</div>
-          <div>{validItems.length} 項</div>
-
-          <div className="text-muted-foreground">工種數</div>
-          <div>{categories.size} 類</div>
-
-          <div className="text-muted-foreground">總金額</div>
-          <div className="font-bold text-base">
-            {formatCurrency(totalAmount)}
-          </div>
-        </div>
+    <div className="max-w-3xl mx-auto space-y-8">
+      {/* Page header */}
+      <div>
+        <h2 className="text-2xl font-semibold text-foreground">匯出文件</h2>
+        <p className="text-sm text-muted-foreground mt-1.5">
+          報價單已完成確認，選擇要匯出的文件。
+        </p>
       </div>
 
-      {/* Risk alerts */}
+      {/* Summary bar */}
+      <div
+        className="rounded-md border border-border bg-card px-6 py-4 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm"
+        style={{ boxShadow: '0 1px 3px rgba(42,42,42,0.06), 0 1px 2px rgba(42,42,42,0.04)' }}
+      >
+        <span className="font-medium text-foreground">{projectName}</span>
+        <span className="text-muted-foreground">{PROJECT_TYPE_LABELS[projectType] ?? projectType}</span>
+        <span className="text-muted-foreground">{siteCondition.totalArea} 坪</span>
+        <span className="text-muted-foreground">{validItems.length} 項</span>
+        <span className="ml-auto font-semibold text-foreground text-base" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          {formatCurrency(totalAmount)}
+        </span>
+      </div>
+
+      {/* Warning alerts */}
       {warningAlerts.length > 0 && (
-        <div className="rounded-lg border border-yellow-300 bg-yellow-50 dark:bg-yellow-950/20 p-6 space-y-3">
-          <h3 className="font-semibold text-base">
+        <div
+          className="rounded-md border border-[#D49028]/30 bg-[#FFF8EE] px-6 py-4 space-y-2"
+        >
+          <h3 className="text-sm font-semibold text-[#D49028]">
             風險提醒 ({warningAlerts.length} 項警告尚未處理)
           </h3>
-          <ul className="space-y-1 text-sm">
+          <ul className="space-y-1 text-sm text-[#8A6A20]">
             {warningAlerts.map((alert) => (
-              <li key={alert.id} className="text-yellow-800 dark:text-yellow-200">
-                - {alert.title}
-              </li>
+              <li key={alert.id}>- {alert.title}</li>
             ))}
           </ul>
         </div>
@@ -154,49 +145,57 @@ export default function ExportPage() {
 
       {/* No items warning */}
       {validItems.length === 0 && (
-        <div className="rounded-lg border border-red-300 bg-red-50 dark:bg-red-950/20 p-6 text-sm text-red-800 dark:text-red-200">
+        <div className="rounded-md border border-[#C44040]/30 bg-[#FEF2F2] px-6 py-4 text-sm text-[#C44040]">
           尚無有效工項，請先返回報價編輯頁面新增工項。
         </div>
       )}
 
-      {/* Download buttons */}
-      <div className="grid grid-cols-1 gap-4">
-        {/* Quotation PDF */}
-        <div className="rounded-lg border bg-card p-5 space-y-3">
-          <div>
-            <h3 className="font-semibold text-base">報價單 PDF</h3>
-            <p className="text-sm text-muted-foreground mt-1">
+      {/* Two export cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Quotation PDF card */}
+        <div
+          className="rounded-md border border-border bg-card p-6 flex flex-col"
+          style={{ boxShadow: '0 1px 3px rgba(42,42,42,0.06), 0 1px 2px rgba(42,42,42,0.04)' }}
+        >
+          <div className="flex-1 space-y-3">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">報價單</h3>
+              <div className="mt-1.5 w-8 h-px bg-primary" />
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               提供給客戶的正式報價文件，包含工項明細與金額。
             </p>
           </div>
-          <Button
-            size="lg"
-            className="w-full text-base py-6"
+          <button
             onClick={handleDownloadQuotation}
             disabled={downloadingQuotation || validItems.length === 0}
+            className="mt-6 w-full py-3 rounded-md text-sm font-semibold bg-primary text-primary-foreground hover:bg-[#9A6232] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {downloadingQuotation ? '產生中...' : '下載報價單 PDF'}
-          </Button>
+          </button>
         </div>
 
-        {/* Risk Report PDF */}
-        <div className="rounded-lg border border-blue-200 bg-blue-50/50 dark:bg-blue-950/10 dark:border-blue-800 p-5 space-y-3">
-          <div>
-            <h3 className="font-semibold text-base">風險檢核報告</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              提供給資深設計師的內部檢核文件。系統已檢查 {ruleStats.totalRules} 條規則，
-              資深設計師只需確認系統無法判斷的項目。
+        {/* Risk Report card */}
+        <div
+          className="rounded-md border border-[#4A7FA5]/20 bg-[#F8FAFC] p-6 flex flex-col"
+          style={{ boxShadow: '0 1px 3px rgba(42,42,42,0.06), 0 1px 2px rgba(42,42,42,0.04)' }}
+        >
+          <div className="flex-1 space-y-3">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">風險檢核報告</h3>
+              <div className="mt-1.5 w-8 h-px bg-[#4A7FA5]" />
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              提供給資深設計師的內部檢核文件。系統已檢查 {ruleStats.totalRules} 條規則。
             </p>
           </div>
-          <Button
-            size="lg"
-            variant="outline"
-            className="w-full text-base py-6 border-blue-300 dark:border-blue-700"
+          <button
             onClick={handleDownloadReport}
             disabled={downloadingReport || validItems.length === 0}
+            className="mt-6 w-full py-3 rounded-md text-sm font-semibold border-2 border-[#4A7FA5]/30 text-[#4A7FA5] bg-transparent hover:bg-[#4A7FA5]/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {downloadingReport ? '產生中...' : '下載風險檢核報告'}
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -205,12 +204,12 @@ export default function ExportPage() {
         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         onClick={() =>
           navigate({
-            to: '/projects/$projectId/quotation',
+            to: '/projects/$projectId/checklist',
             params: { projectId: 'demo' },
           })
         }
       >
-        &larr; 返回報價編輯
+        &larr; 返回完成確認
       </button>
     </div>
   );

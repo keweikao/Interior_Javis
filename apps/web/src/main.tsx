@@ -17,46 +17,56 @@ const rootRoute = createRootRoute({
   component: function RootLayout() {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <header className="border-b px-6 py-3 flex items-center gap-6">
-          <h1 className="text-lg font-bold tracking-tight">Q-Check</h1>
-          <nav className="flex gap-4 text-sm">
-            <Link
-              to="/projects/$projectId"
-              params={{ projectId: 'demo' }}
-              className="text-muted-foreground hover:text-foreground transition-colors [&.active]:text-foreground [&.active]:font-medium"
-            >
-              現場條件
-            </Link>
-            <Link
-              to="/projects/$projectId/quotation"
-              params={{ projectId: 'demo' }}
-              className="text-muted-foreground hover:text-foreground transition-colors [&.active]:text-foreground [&.active]:font-medium"
-            >
-              報價編輯
-            </Link>
-            <Link
-              to="/projects/$projectId/checklist"
-              params={{ projectId: 'demo' }}
-              className="text-muted-foreground hover:text-foreground transition-colors [&.active]:text-foreground [&.active]:font-medium"
-            >
-              完成確認
-            </Link>
-            <Link
-              to="/projects/$projectId/export"
-              params={{ projectId: 'demo' }}
-              className="text-muted-foreground hover:text-foreground transition-colors [&.active]:text-foreground [&.active]:font-medium"
-            >
-              匯出
-            </Link>
-            <Link
-              to="/upload"
-              className="text-muted-foreground hover:text-foreground transition-colors [&.active]:text-foreground [&.active]:font-medium"
-            >
-              上傳檢查
-            </Link>
-          </nav>
+        <header className="border-b border-border">
+          <div className="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
+            <div className="relative">
+              <h1
+                className="text-xl tracking-tight"
+                style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 500 }}
+              >
+                Q-Check
+              </h1>
+              <div className="absolute -bottom-1 left-0 w-8 h-0.5 bg-primary rounded-full" />
+            </div>
+            <nav className="flex gap-6 text-sm font-medium">
+              <Link
+                to="/projects/$projectId"
+                params={{ projectId: 'demo' }}
+                className="text-muted-foreground hover:text-foreground transition-colors py-1 border-b-2 border-transparent [&.active]:text-primary [&.active]:border-primary"
+              >
+                現場條件
+              </Link>
+              <Link
+                to="/projects/$projectId/quotation"
+                params={{ projectId: 'demo' }}
+                className="text-muted-foreground hover:text-foreground transition-colors py-1 border-b-2 border-transparent [&.active]:text-primary [&.active]:border-primary"
+              >
+                報價編輯
+              </Link>
+              <Link
+                to="/projects/$projectId/checklist"
+                params={{ projectId: 'demo' }}
+                className="text-muted-foreground hover:text-foreground transition-colors py-1 border-b-2 border-transparent [&.active]:text-primary [&.active]:border-primary"
+              >
+                完成確認
+              </Link>
+              <Link
+                to="/projects/$projectId/export"
+                params={{ projectId: 'demo' }}
+                className="text-muted-foreground hover:text-foreground transition-colors py-1 border-b-2 border-transparent [&.active]:text-primary [&.active]:border-primary"
+              >
+                匯出
+              </Link>
+              <Link
+                to="/upload"
+                className="text-muted-foreground hover:text-foreground transition-colors py-1 border-b-2 border-transparent [&.active]:text-primary [&.active]:border-primary"
+              >
+                上傳檢查
+              </Link>
+            </nav>
+          </div>
         </header>
-        <main className="p-6">
+        <main className="max-w-7xl mx-auto px-8 py-8">
           <Outlet />
         </main>
       </div>

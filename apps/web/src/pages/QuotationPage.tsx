@@ -1,12 +1,5 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import { useQuotationStore } from '@/stores/quotation-store';
 import { useRiskEngine } from '@/hooks/useRiskEngine';
 import { RiskAlertPanel } from '@/components/RiskAlertPanel';
@@ -206,106 +199,150 @@ export default function QuotationPage() {
   }, []);
 
   return (
-    <div className="flex gap-4 h-[calc(100vh-5rem)]">
+    <div className="flex gap-6 h-[calc(100vh-5rem)]">
       {/* Main content area */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Skeleton control bar */}
-        <div className="rounded-lg border bg-card p-4 space-y-3">
-          <div className="flex items-center gap-3">
-            <Badge variant="secondary">
+        {/* Project header */}
+        <div className="mb-5">
+          <h1 className="text-xl font-semibold text-[#2A2A2A] tracking-tight">
+            {store.projectName || '未命名案件'}
+            <span className="text-[#8A8580] font-normal mx-2">/</span>
+            <span className="text-[#8A8580] font-normal text-base">
               {PROJECT_TYPE_LABELS[projectType] ?? projectType}
-            </Badge>
-            <span className="text-sm text-muted-foreground">
-              {store.projectName || '未命名案件'} / {siteCondition.totalArea} 坪
+            </span>
+            <span className="text-[#8A8580] font-normal mx-2">/</span>
+            <span className="text-[#8A8580] font-normal text-base">
+              {siteCondition.totalArea} 坪
+            </span>
+          </h1>
+        </div>
+
+        {/* Skeleton control bar */}
+        <div
+          className="rounded-md bg-white p-5 space-y-4"
+          style={{
+            border: '1px solid #E8E4DF',
+            boxShadow: '0 1px 3px rgba(42,42,42,0.06), 0 1px 2px rgba(42,42,42,0.04)',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <span
+              className="text-xs font-semibold tracking-wide uppercase text-[#8A8580]"
+            >
+              工種選擇
             </span>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            {ALL_CATEGORIES.map((cat) => (
-              <label
-                key={cat.value}
-                className="flex items-center gap-1.5 text-sm cursor-pointer"
-              >
-                <Checkbox
-                  checked={selectedCategories.has(cat.value)}
-                  onCheckedChange={() => toggleCategory(cat.value)}
+          <div className="flex flex-wrap gap-2">
+            {ALL_CATEGORIES.map((cat) => {
+              const isSelected = selectedCategories.has(cat.value);
+              return (
+                <button
+                  key={cat.value}
+                  type="button"
                   disabled={skeletonLoaded}
-                />
-                {cat.label}
-              </label>
-            ))}
+                  onClick={() => toggleCategory(cat.value)}
+                  className={`
+                    px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer
+                    transition-all duration-150
+                    ${skeletonLoaded ? 'opacity-50 cursor-not-allowed' : ''}
+                    ${isSelected
+                      ? 'bg-[#B8763E] text-white'
+                      : 'bg-[#F7F5F2] text-[#8A8580] hover:bg-[#F0EDE8] hover:text-[#2A2A2A]'
+                    }
+                  `}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
 
           <div>
             {skeletonLoaded ? (
-              <Button variant="secondary" disabled>
+              <span className="inline-flex items-center px-3 py-1.5 rounded text-xs font-medium text-[#5A8A58] bg-[#F0F7F0]">
                 已帶入 {loadedCount} 項
-              </Button>
+              </span>
             ) : (
-              <Button onClick={handleLoadSkeleton}>帶入工項骨架</Button>
+              <button
+                onClick={handleLoadSkeleton}
+                className="
+                  px-4 py-2 rounded text-sm font-medium
+                  border border-[#B8763E] text-[#B8763E]
+                  hover:bg-[#B8763E] hover:text-white
+                  transition-all duration-150 cursor-pointer
+                "
+              >
+                帶入工項骨架
+              </button>
             )}
           </div>
         </div>
 
-        <Separator className="my-3" />
-
         {/* Quotation table */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto mt-5">
           {groupedItems.length === 0 ? (
-            <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
+            <div className="flex items-center justify-center h-48 text-[#B5B0AA] text-sm">
               請先選擇工種並帶入工項骨架
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-background border-b">
-                <tr className="text-left text-muted-foreground">
-                  <th className="py-2 px-2 font-medium">工項名稱</th>
-                  <th className="py-2 px-2 font-medium w-16 text-center">單位</th>
-                  <th className="py-2 px-2 font-medium w-24 text-right">數量</th>
-                  <th className="py-2 px-2 font-medium w-28 text-right">單價</th>
-                  <th className="py-2 px-2 font-medium w-28 text-right">小計</th>
-                  <th className="py-2 px-2 font-medium w-24 text-center">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {groupedItems.map((group) => (
-                  <CategoryGroup
-                    key={group.category}
-                    category={group.category}
-                    items={group.items}
-                    expandedItems={expandedItems}
-                    onToggleExpand={toggleExpand}
-                    onUpdateItem={updateItem}
-                    onRemoveItem={removeItem}
-                    onAddItem={handleAddItem}
-                  />
-                ))}
-              </tbody>
-            </table>
+            <div className="space-y-4">
+              {groupedItems.map((group) => (
+                <CategoryGroup
+                  key={group.category}
+                  category={group.category}
+                  items={group.items}
+                  expandedItems={expandedItems}
+                  onToggleExpand={toggleExpand}
+                  onUpdateItem={updateItem}
+                  onRemoveItem={removeItem}
+                  onAddItem={handleAddItem}
+                />
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Total bar */}
-        <div className="border-t bg-card px-4 py-3 flex justify-end items-center gap-4 mt-auto">
-          <span className="text-muted-foreground text-sm">總金額:</span>
-          <span className="text-lg font-bold">{formatCurrency(totalAmount)}</span>
-          <Button
-            variant="default"
-            size="sm"
+        {/* Total bar - sticky bottom */}
+        <div
+          className="mt-auto px-5 py-4 flex justify-end items-center gap-5 bg-white"
+          style={{
+            borderTop: '1px solid #E8E4DF',
+            position: 'sticky',
+            bottom: 0,
+          }}
+        >
+          <span className="text-sm text-[#8A8580]">總金額</span>
+          <span className="text-xl font-bold text-[#B8763E] tabular-nums tracking-tight">
+            {formatCurrency(totalAmount)}
+          </span>
+          <button
             onClick={() =>
               navigate({
                 to: '/projects/$projectId/checklist',
                 params: { projectId: 'demo' },
               })
             }
+            className="
+              px-5 py-2.5 rounded-md text-sm font-semibold
+              bg-[#B8763E] text-white
+              hover:bg-[#9A6232]
+              transition-all duration-150 cursor-pointer
+            "
           >
             完成確認
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Risk panel sidebar */}
-      <div className="w-80 shrink-0 border rounded-lg bg-card overflow-hidden">
+      <div
+        className="w-80 shrink-0 rounded-md bg-white overflow-hidden flex flex-col"
+        style={{
+          border: '1px solid #E8E4DF',
+          boxShadow: '0 1px 3px rgba(42,42,42,0.06), 0 1px 2px rgba(42,42,42,0.04)',
+        }}
+      >
         <RiskAlertPanel
           alerts={alerts}
           dismissedIds={dismissedAlertIds}
@@ -325,7 +362,7 @@ export default function QuotationPage() {
   );
 }
 
-// Extracted category group component for the table
+// Extracted category group component
 function CategoryGroup({
   category,
   items,
@@ -344,26 +381,47 @@ function CategoryGroup({
   onAddItem: (category: TradeCategory) => void;
 }) {
   return (
-    <>
+    <div
+      className="rounded-md bg-white overflow-hidden"
+      style={{
+        border: '1px solid #E8E4DF',
+        boxShadow: '0 1px 3px rgba(42,42,42,0.06), 0 1px 2px rgba(42,42,42,0.04)',
+      }}
+    >
       {/* Category header */}
-      <tr className="bg-muted/50">
-        <td colSpan={5} className="py-2 px-2 font-semibold text-sm">
-          {CATEGORY_NAMES[category] ?? category}
-          <span className="text-muted-foreground font-normal ml-2">
-            ({items.length} 項)
+      <div
+        className="flex items-center justify-between px-4 py-3 bg-[#F7F5F2]"
+        style={{ borderLeft: '3px solid #B8763E' }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-[#2A2A2A]">
+            {CATEGORY_NAMES[category] ?? category}
           </span>
-        </td>
-        <td className="py-2 px-2 text-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-xs"
-            onClick={() => onAddItem(category)}
-          >
-            + 新增
-          </Button>
-        </td>
-      </tr>
+          <span className="text-xs text-[#8A8580]">
+            {items.length} 項
+          </span>
+        </div>
+        <button
+          onClick={() => onAddItem(category)}
+          className="
+            px-2 py-1 rounded text-xs font-medium
+            text-[#8A8580] hover:text-[#B8763E]
+            transition-colors duration-150 cursor-pointer
+          "
+        >
+          + 新增
+        </button>
+      </div>
+
+      {/* Table header */}
+      <div className="grid grid-cols-[1fr_60px_80px_100px_100px_80px] px-4 py-2 text-xs font-medium text-[#B5B0AA] uppercase tracking-wider border-b border-[#E8E4DF]">
+        <span>工項名稱</span>
+        <span className="text-center">單位</span>
+        <span className="text-right">數量</span>
+        <span className="text-right">單價</span>
+        <span className="text-right">小計</span>
+        <span className="text-center">操作</span>
+      </div>
 
       {/* Item rows */}
       {items.map((itm) => (
@@ -376,7 +434,7 @@ function CategoryGroup({
           onRemove={() => onRemoveItem(itm.id)}
         />
       ))}
-    </>
+    </div>
   );
 }
 
@@ -398,145 +456,149 @@ function ItemRow({
 
   return (
     <>
-      <tr className="border-b hover:bg-muted/30">
-        <td className="py-1.5 px-2">
-          <div className="flex items-center gap-1.5">
-            <select
-              className="h-7 text-xs border rounded px-1 bg-background"
-              value={item.category}
-              onChange={(e) =>
-                onUpdate({ category: e.target.value as TradeCategory })
-              }
+      <div className="group grid grid-cols-[1fr_60px_80px_100px_100px_80px] items-center px-4 py-2.5 border-b border-[#E8E4DF] last:border-b-0 hover:bg-[#FDFCFA] transition-colors duration-100">
+        {/* Item name with category select */}
+        <div className="flex items-center gap-2 min-w-0">
+          <select
+            className="h-7 text-xs border border-[#E8E4DF] rounded px-1.5 bg-white text-[#2A2A2A] focus:border-[#B8763E] focus:ring-0 cursor-pointer"
+            value={item.category}
+            onChange={(e) =>
+              onUpdate({ category: e.target.value as TradeCategory })
+            }
+          >
+            {ALL_CATEGORY_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          {editingName ? (
+            <input
+              className="h-7 text-sm flex-1 min-w-0 border-0 border-b border-[#E8E4DF] bg-transparent px-1 focus:border-[#B8763E] focus:outline-none focus:ring-0"
+              value={item.itemName}
+              onChange={(e) => onUpdate({ itemName: e.target.value })}
+              onBlur={() => {
+                if (item.itemName) setEditingName(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && item.itemName) setEditingName(false);
+              }}
+              placeholder="輸入工項名稱..."
+              autoFocus
+            />
+          ) : (
+            <span
+              className="cursor-pointer hover:text-[#B8763E] flex-1 truncate text-sm text-[#2A2A2A]"
+              onClick={() => setEditingName(true)}
+              title="點擊編輯名稱"
             >
-              {ALL_CATEGORY_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            {editingName ? (
-              <Input
-                className="h-7 text-sm flex-1"
-                value={item.itemName}
-                onChange={(e) => onUpdate({ itemName: e.target.value })}
-                onBlur={() => {
-                  if (item.itemName) setEditingName(false);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && item.itemName) setEditingName(false);
-                }}
-                placeholder="輸入工項名稱..."
-                autoFocus
-              />
-            ) : (
-              <span
-                className="cursor-pointer hover:underline flex-1 truncate"
-                onClick={() => setEditingName(true)}
-                title="點擊編輯名稱"
-              >
-                {item.itemName}
-              </span>
-            )}
-          </div>
-        </td>
-        <td className="py-1.5 px-2 text-center text-muted-foreground">
-          {item.unit}
-        </td>
-        <td className="py-1.5 px-2">
-          <Input
-            type="number"
-            className="h-7 text-right text-sm w-full"
-            min="0"
-            max="99999"
-            value={item.quantity ?? ''}
-            onChange={(e) => {
-              const val = e.target.value ? Number(e.target.value) : null;
-              const validated = val !== null ? Math.max(0, Math.min(val, 99999)) : null;
-              onUpdate({ quantity: validated });
-            }}
-            placeholder="0"
-          />
-        </td>
-        <td className="py-1.5 px-2">
-          <Input
-            type="number"
-            className="h-7 text-right text-sm w-full"
-            min="0"
-            max="99999999"
-            value={item.unitPrice ?? ''}
-            onChange={(e) => {
-              const val = e.target.value ? Number(e.target.value) : null;
-              const validated = val !== null ? Math.max(0, Math.min(val, 99999999)) : null;
-              onUpdate({ unitPrice: validated });
-            }}
-            placeholder="0"
-          />
-        </td>
-        <td className="py-1.5 px-2 text-right tabular-nums">
-          {subtotal > 0 ? subtotal.toLocaleString('en-US') : '-'}
-        </td>
-        <td className="py-1.5 px-2 text-center">
-          <div className="flex gap-1 justify-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 px-2 text-xs"
-              onClick={onToggleExpand}
-            >
-              {expanded ? '收合' : '展開'}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 px-2 text-xs text-destructive hover:text-destructive"
-              onClick={onRemove}
-            >
-              刪除
-            </Button>
-          </div>
-        </td>
-      </tr>
+              {item.itemName}
+            </span>
+          )}
+        </div>
 
+        {/* Unit */}
+        <span className="text-center text-xs text-[#8A8580]">
+          {item.unit}
+        </span>
+
+        {/* Quantity */}
+        <input
+          type="number"
+          className="h-7 text-right text-sm w-full bg-transparent border-0 border-b border-transparent hover:border-[#E8E4DF] focus:border-[#B8763E] focus:outline-none focus:ring-0 px-1 tabular-nums"
+          min="0"
+          max="99999"
+          value={item.quantity ?? ''}
+          onChange={(e) => {
+            const val = e.target.value ? Number(e.target.value) : null;
+            const validated = val !== null ? Math.max(0, Math.min(val, 99999)) : null;
+            onUpdate({ quantity: validated });
+          }}
+          placeholder="0"
+        />
+
+        {/* Unit price */}
+        <input
+          type="number"
+          className="h-7 text-right text-sm w-full bg-transparent border-0 border-b border-transparent hover:border-[#E8E4DF] focus:border-[#B8763E] focus:outline-none focus:ring-0 px-1 tabular-nums"
+          min="0"
+          max="99999999"
+          value={item.unitPrice ?? ''}
+          onChange={(e) => {
+            const val = e.target.value ? Number(e.target.value) : null;
+            const validated = val !== null ? Math.max(0, Math.min(val, 99999999)) : null;
+            onUpdate({ unitPrice: validated });
+          }}
+          placeholder="0"
+        />
+
+        {/* Subtotal */}
+        <span className="text-right text-sm tabular-nums text-[#2A2A2A]">
+          {subtotal > 0 ? subtotal.toLocaleString('en-US') : '-'}
+        </span>
+
+        {/* Actions */}
+        <div className="flex gap-1 justify-center items-center">
+          <button
+            onClick={onToggleExpand}
+            className="px-1.5 py-0.5 rounded text-xs text-[#B8763E] hover:bg-[#F7F5F2] transition-colors cursor-pointer"
+          >
+            {expanded ? '收合' : '展開'}
+          </button>
+          <button
+            onClick={onRemove}
+            className="px-1.5 py-0.5 rounded text-xs text-[#B5B0AA] opacity-0 group-hover:opacity-100 hover:text-[#C44040] hover:bg-[#FEF2F2] transition-all cursor-pointer"
+          >
+            刪除
+          </button>
+        </div>
+      </div>
+
+      {/* Expanded detail */}
       {expanded && (
-        <tr className="border-b bg-muted/20">
-          <td colSpan={6} className="px-4 py-3">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <Label className="text-xs">規格說明</Label>
-                <Textarea
-                  className="text-xs min-h-[60px]"
-                  value={item.specification ?? ''}
-                  onChange={(e) =>
-                    onUpdate({ specification: e.target.value || null })
-                  }
-                  placeholder="規格說明..."
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">包含項目</Label>
-                <Textarea
-                  className="text-xs min-h-[60px]"
-                  value={item.includes ?? ''}
-                  onChange={(e) =>
-                    onUpdate({ includes: e.target.value || null })
-                  }
-                  placeholder="包含項目..."
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">不包含項目</Label>
-                <Textarea
-                  className="text-xs min-h-[60px]"
-                  value={item.excludes ?? ''}
-                  onChange={(e) =>
-                    onUpdate({ excludes: e.target.value || null })
-                  }
-                  placeholder="不包含項目..."
-                />
-              </div>
+        <div className="px-6 py-4 bg-[#FDFAF6] border-b border-[#E8E4DF]">
+          <div className="grid grid-cols-3 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-medium uppercase tracking-widest text-[#B5B0AA]">
+                規格說明
+              </label>
+              <textarea
+                className="w-full text-xs min-h-[68px] p-2.5 rounded bg-white border border-[#E8E4DF] focus:border-[#B8763E] focus:outline-none focus:ring-2 focus:ring-[#B8763E]/15 resize-y"
+                value={item.specification ?? ''}
+                onChange={(e) =>
+                  onUpdate({ specification: e.target.value || null })
+                }
+                placeholder="規格說明..."
+              />
             </div>
-          </td>
-        </tr>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-medium uppercase tracking-widest text-[#B5B0AA]">
+                包含項目
+              </label>
+              <textarea
+                className="w-full text-xs min-h-[68px] p-2.5 rounded bg-white border border-[#E8E4DF] focus:border-[#B8763E] focus:outline-none focus:ring-2 focus:ring-[#B8763E]/15 resize-y"
+                value={item.includes ?? ''}
+                onChange={(e) =>
+                  onUpdate({ includes: e.target.value || null })
+                }
+                placeholder="包含項目..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-medium uppercase tracking-widest text-[#B5B0AA]">
+                不包含項目
+              </label>
+              <textarea
+                className="w-full text-xs min-h-[68px] p-2.5 rounded bg-white border border-[#E8E4DF] focus:border-[#B8763E] focus:outline-none focus:ring-2 focus:ring-[#B8763E]/15 resize-y"
+                value={item.excludes ?? ''}
+                onChange={(e) =>
+                  onUpdate({ excludes: e.target.value || null })
+                }
+                placeholder="不包含項目..."
+              />
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
