@@ -21,7 +21,7 @@ function formatCurrency(value: number): string {
 }
 
 export default function SiteConditionPage() {
-  const { siteCondition, setSiteCondition, projectType, setProjectType, projectName, setProjectName } =
+  const { siteCondition, setSiteCondition, projectType, setProjectType, projectName, setProjectName, resetAll } =
     useQuotationStore();
   const navigate = useNavigate();
 
@@ -122,10 +122,13 @@ export default function SiteConditionPage() {
               <Input
                 id="totalArea"
                 type="number"
+                min="0"
+                max="500"
                 value={siteCondition.totalArea || ''}
-                onChange={(e) =>
-                  setSiteCondition({ totalArea: Number(e.target.value) })
-                }
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setSiteCondition({ totalArea: Math.max(0, Math.min(val, 500)) });
+                }}
                 placeholder="例: 30"
               />
             </div>
@@ -134,10 +137,13 @@ export default function SiteConditionPage() {
               <Input
                 id="floorLevel"
                 type="number"
+                min="0"
+                max="50"
                 value={siteCondition.floorLevel || ''}
-                onChange={(e) =>
-                  setSiteCondition({ floorLevel: Number(e.target.value) })
-                }
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setSiteCondition({ floorLevel: Math.max(0, Math.min(val, 50)) });
+                }}
                 placeholder="例: 5"
               />
             </div>
@@ -149,10 +155,13 @@ export default function SiteConditionPage() {
               <Input
                 id="buildingAge"
                 type="number"
+                min="0"
+                max="100"
                 value={siteCondition.buildingAge || ''}
-                onChange={(e) =>
-                  setSiteCondition({ buildingAge: Number(e.target.value) })
-                }
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setSiteCondition({ buildingAge: Math.max(0, Math.min(val, 100)) });
+                }}
                 placeholder="例: 25"
               />
             </div>
@@ -161,14 +170,17 @@ export default function SiteConditionPage() {
               <Input
                 id="clientBudget"
                 type="number"
+                min="0"
+                max="99999"
                 value={siteCondition.clientBudget ?? ''}
-                onChange={(e) =>
-                  setSiteCondition({
-                    clientBudget: e.target.value
-                      ? Number(e.target.value)
-                      : null,
-                  })
-                }
+                onChange={(e) => {
+                  if (!e.target.value) {
+                    setSiteCondition({ clientBudget: null });
+                    return;
+                  }
+                  const val = Number(e.target.value);
+                  setSiteCondition({ clientBudget: Math.max(0, Math.min(val, 99999)) });
+                }}
                 placeholder="例: 300"
               />
             </div>
@@ -221,6 +233,21 @@ export default function SiteConditionPage() {
       >
         開始報價
       </Button>
+
+      <div className="flex justify-center pt-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground"
+          onClick={() => {
+            if (window.confirm('確定要清除所有資料嗎？此操作無法復原。')) {
+              resetAll();
+            }
+          }}
+        >
+          清除所有資料
+        </Button>
+      </div>
     </div>
   );
 }

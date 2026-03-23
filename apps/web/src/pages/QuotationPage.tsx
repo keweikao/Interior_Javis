@@ -78,7 +78,7 @@ const ALL_CATEGORY_OPTIONS: { value: TradeCategory; label: string }[] = [
 ];
 
 function formatCurrency(value: number): string {
-  if (!value || value <= 0) return 'NT$ 0';
+  if (value === 0 || value === null || value === undefined) return 'NT$ 0';
   return `NT$ ${Math.round(value).toLocaleString('en-US')}`;
 }
 
@@ -294,12 +294,12 @@ export default function QuotationPage() {
             size="sm"
             onClick={() =>
               navigate({
-                to: '/projects/$projectId/export',
+                to: '/projects/$projectId/checklist',
                 params: { projectId: 'demo' },
               })
             }
           >
-            匯出報價單
+            完成確認
           </Button>
         </div>
       </div>
@@ -446,12 +446,14 @@ function ItemRow({
           <Input
             type="number"
             className="h-7 text-right text-sm w-full"
+            min="0"
+            max="99999"
             value={item.quantity ?? ''}
-            onChange={(e) =>
-              onUpdate({
-                quantity: e.target.value ? Number(e.target.value) : null,
-              })
-            }
+            onChange={(e) => {
+              const val = e.target.value ? Number(e.target.value) : null;
+              const validated = val !== null ? Math.max(0, Math.min(val, 99999)) : null;
+              onUpdate({ quantity: validated });
+            }}
             placeholder="0"
           />
         </td>
@@ -459,12 +461,14 @@ function ItemRow({
           <Input
             type="number"
             className="h-7 text-right text-sm w-full"
+            min="0"
+            max="99999999"
             value={item.unitPrice ?? ''}
-            onChange={(e) =>
-              onUpdate({
-                unitPrice: e.target.value ? Number(e.target.value) : null,
-              })
-            }
+            onChange={(e) => {
+              const val = e.target.value ? Number(e.target.value) : null;
+              const validated = val !== null ? Math.max(0, Math.min(val, 99999999)) : null;
+              onUpdate({ unitPrice: validated });
+            }}
             placeholder="0"
           />
         </td>

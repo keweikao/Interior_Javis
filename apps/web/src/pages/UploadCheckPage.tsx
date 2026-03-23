@@ -332,6 +332,9 @@ export default function UploadCheckPage() {
             <p className="text-xs text-muted-foreground">
               支援 PDF 格式，上限 20MB
             </p>
+            <p className="text-xs text-muted-foreground/60 mt-2">
+              上傳的報價單將透過 Google AI 進行解析，請確認不含機密資料
+            </p>
           </div>
           <input
             ref={fileInputRef}

@@ -35,6 +35,13 @@ const rootRoute = createRootRoute({
               報價編輯
             </Link>
             <Link
+              to="/projects/$projectId/checklist"
+              params={{ projectId: 'demo' }}
+              className="text-muted-foreground hover:text-foreground transition-colors [&.active]:text-foreground [&.active]:font-medium"
+            >
+              完成確認
+            </Link>
+            <Link
               to="/projects/$projectId/export"
               params={{ projectId: 'demo' }}
               className="text-muted-foreground hover:text-foreground transition-colors [&.active]:text-foreground [&.active]:font-medium"
@@ -69,6 +76,7 @@ const indexRoute = createRoute({
 // -- Lazy-load page components --
 import SiteConditionPage from './pages/SiteConditionPage'
 import QuotationPage from './pages/QuotationPage'
+import ChecklistPage from './pages/ChecklistPage'
 import ExportPage from './pages/ExportPage'
 import UploadCheckPage from './pages/UploadCheckPage'
 
@@ -83,6 +91,12 @@ const projectQuotationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/projects/$projectId/quotation',
   component: QuotationPage,
+})
+
+const projectChecklistRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/projects/$projectId/checklist',
+  component: ChecklistPage,
 })
 
 const projectExportRoute = createRoute({
@@ -102,6 +116,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   projectIndexRoute,
   projectQuotationRoute,
+  projectChecklistRoute,
   projectExportRoute,
   uploadRoute,
 ])
