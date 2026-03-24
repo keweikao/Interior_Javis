@@ -4,15 +4,15 @@ import { SectionLabel } from '@/components/ui/SectionLabel'
 
 function Quad({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <motion.div variants={fadeUp} className={`bg-card rounded-xl p-4 ${className}`}>
-      <p className="text-sm font-bold text-gold mb-2">{title}</p>
+    <motion.div variants={fadeUp} className={`bg-card rounded-xl p-5 ${className}`}>
+      <p className="text-base font-bold text-gold mb-3">{title}</p>
       {children}
     </motion.div>
   )
 }
 
 function Li({ children, color = 'text-cream' }: { children: string; color?: string }) {
-  return <p className={`text-xs ${color} mb-1`}>{children}</p>
+  return <p className={`text-sm ${color} mb-1.5`}>{children}</p>
 }
 
 export function Slide07POCD() {
@@ -21,10 +21,10 @@ export function Slide07POCD() {
       variants={stagger}
       initial="hidden"
       animate="visible"
-      className="w-full h-full flex flex-col justify-start px-14 pt-10 pb-12"
+      className="w-full h-full flex flex-col justify-start px-[6%] pt-[4%] pb-[3%]"
     >
       <SectionLabel text="POCD 分析" />
-      <div className="flex-1 grid grid-cols-2 gap-3 mt-3">
+      <div className="flex-1 grid grid-cols-2 gap-4 mt-4">
         <Quad title="People 團隊">
           <Li>呂賀云：10 年以上設計師，她本人就是目標用戶</Li>
           <Li>高克瑋：10 年銷售營運經驗，iCHEF 銷售流程 AI 導入經驗</Li>

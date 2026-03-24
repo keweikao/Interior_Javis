@@ -7,8 +7,8 @@ interface Competitor {
   name: string
   promise: string
   detail: string
-  x: number  // 0-100, left=general, right=interior-specific
-  y: number  // 0-100, bottom=after, top=before
+  x: number
+  y: number
   color: string
   isMain?: boolean
 }
@@ -31,10 +31,10 @@ export function Slide08Competition() {
       variants={stagger}
       initial="hidden"
       animate="visible"
-      className="w-full h-full flex flex-col justify-start px-14 pt-10 pb-12"
+      className="w-full h-full flex flex-col justify-start px-[6%] pt-[4%] pb-[3%]"
     >
       <SectionLabel text="競爭格局" />
-      <motion.h2 variants={fadeUp} className="text-2xl font-bold mt-2 mb-4">
+      <motion.h2 variants={fadeUp} className="text-4xl font-bold mt-3 mb-6">
         每個玩家賣的是什麼承諾？
       </motion.h2>
 
@@ -44,10 +44,10 @@ export function Slide08Competition() {
         <div className="absolute top-1/2 left-0 right-0 h-px bg-cream-dim/20" />
 
         {/* Axis labels */}
-        <span className="absolute left-2 top-1/2 translate-y-2 text-xs text-cream-dim">通用工具</span>
-        <span className="absolute right-2 top-1/2 translate-y-2 text-xs text-cream-dim">室內設計專用</span>
-        <span className="absolute left-1/2 -translate-x-1/2 top-0 text-xs text-cream-dim">事前預防</span>
-        <span className="absolute left-1/2 -translate-x-1/2 bottom-2 text-xs text-cream-dim">事後管理</span>
+        <span className="absolute left-3 top-1/2 translate-y-3 text-base text-cream-dim">通用工具</span>
+        <span className="absolute right-3 top-1/2 translate-y-3 text-base text-cream-dim">室內設計專用</span>
+        <span className="absolute left-1/2 -translate-x-1/2 top-1 text-base text-cream-dim">事前預防</span>
+        <span className="absolute left-1/2 -translate-x-1/2 bottom-3 text-base text-cream-dim">事後管理</span>
 
         {/* Cards */}
         {competitors.map((c) => {
@@ -75,20 +75,20 @@ export function Slide08Competition() {
                 />
               )}
               <div
-                className={`rounded-lg px-4 py-3 transition-all duration-200 ${
-                  isMain ? 'min-w-[220px]' : 'min-w-[180px]'
+                className={`rounded-lg px-5 py-3.5 transition-all duration-200 ${
+                  isMain ? 'min-w-[240px]' : 'min-w-[200px]'
                 } ${isHovered ? 'scale-105' : ''}`}
                 style={{
                   backgroundColor: isMain ? '#4D3D28' : '#4A423C',
                   borderLeft: `3px solid ${c.color}`,
                 }}
               >
-                <p className={`font-bold ${isMain ? 'text-base' : 'text-sm'}`}>{c.name}</p>
-                <p className="text-xs mt-1" style={{ color: c.color }}>「{c.promise}」</p>
-                {c.detail && <p className="text-xs text-cream-dim mt-1">{c.detail}</p>}
+                <p className={`font-bold ${isMain ? 'text-lg' : 'text-base'}`}>{c.name}</p>
+                <p className="text-sm mt-1" style={{ color: c.color }}>「{c.promise}」</p>
+                {c.detail && <p className="text-sm text-cream-dim mt-1">{c.detail}</p>}
               </div>
               {isMain && (
-                <p className="text-xs font-bold text-gold text-center mt-2">
+                <p className="text-sm font-bold text-gold text-center mt-2">
                   唯一的事前預防 × 設計專用
                 </p>
               )}

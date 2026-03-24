@@ -21,40 +21,40 @@ export function Slide06Market() {
       variants={stagger}
       initial="hidden"
       animate="visible"
-      className="w-full h-full flex flex-col justify-start px-14 pt-10 pb-12"
+      className="w-full h-full flex flex-col justify-center px-[6%] py-[4%]"
     >
       <SectionLabel text="市場機會" />
-      <motion.h2 variants={fadeUp} className="text-2xl font-bold mt-2 mb-5">
+      <motion.h2 variants={fadeUp} className="text-4xl font-bold mt-3 mb-8">
         台灣裝修年產值 5,500 億，風險管理是空白地帶
       </motion.h2>
 
-      <div className="flex gap-6">
+      <div className="flex gap-10">
         {/* Left: Funnel */}
-        <motion.div variants={stagger} className="flex-1 space-y-4">
+        <motion.div variants={stagger} className="flex-1 space-y-5">
           {funnel.map((f, i) => {
             const colors = ['bg-[#4A3F38]', 'bg-[#5A4E45]', 'bg-gold']
             return (
               <motion.div
                 key={f.label}
                 variants={fadeUp}
-                className={`${colors[i]} rounded-lg px-5 py-3 flex items-center justify-between`}
+                className={`${colors[i]} rounded-lg px-6 py-4 flex items-center justify-between`}
                 style={{ width: f.w }}
               >
-                <span className="font-bold text-sm">{f.label}</span>
-                <span className="text-sm">{f.desc}</span>
+                <span className="font-bold text-lg">{f.label}</span>
+                <span className="text-base">{f.desc}</span>
               </motion.div>
             )
           })}
         </motion.div>
 
         {/* Right: Why Now */}
-        <motion.div variants={fadeUp} className="w-[380px] bg-card rounded-xl p-4">
-          <p className="text-sm font-bold text-gold mb-3">為什麼是現在</p>
-          <div className="space-y-3">
+        <motion.div variants={fadeUp} className="w-[45%] bg-card rounded-xl p-6">
+          <p className="text-lg font-bold text-gold mb-4">為什麼是現在</p>
+          <div className="space-y-4">
             {reasons.map((r) => (
               <div key={r.t}>
-                <p className="text-sm font-bold text-gold">{r.t}</p>
-                <p className="text-sm text-cream mt-1">{r.d}</p>
+                <p className="text-base font-bold text-gold">{r.t}</p>
+                <p className="text-base text-cream mt-1">{r.d}</p>
               </div>
             ))}
           </div>

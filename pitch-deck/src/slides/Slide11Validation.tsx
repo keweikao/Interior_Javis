@@ -15,31 +15,31 @@ export function Slide11Validation() {
       variants={stagger}
       initial="hidden"
       animate="visible"
-      className="w-full h-full flex flex-col justify-start px-14 pt-10 pb-12"
+      className="w-full h-full flex flex-col justify-center px-[6%] py-[4%]"
     >
       <SectionLabel text="驗證計畫和風險" />
-      <motion.h2 variants={fadeUp} className="text-2xl font-bold mt-2 mb-5">
+      <motion.h2 variants={fadeUp} className="text-4xl font-bold mt-3 mb-8">
         我們知道什麼還沒被驗證
       </motion.h2>
 
-      <motion.div variants={stagger} className="space-y-3 flex-1">
+      <motion.div variants={stagger} className="space-y-4">
         {risks.map((r) => (
           <motion.div
             key={r.q}
             variants={fadeUp}
-            className="bg-card rounded-lg px-4 py-3 flex items-center gap-4"
+            className="bg-card rounded-lg px-6 py-4 flex items-center gap-5"
           >
-            <span className={`${r.color} text-white text-xs font-bold px-3 py-1 rounded`}>
+            <span className={`${r.color} text-white text-sm font-bold px-4 py-1.5 rounded shrink-0`}>
               {r.level}
             </span>
-            <p className="flex-1 font-bold text-sm">{r.q}</p>
-            <p className="text-sm text-cream-dim w-80 text-right">{r.method}</p>
+            <p className="flex-1 font-bold text-base">{r.q}</p>
+            <p className="text-base text-cream-dim w-[340px] text-right">{r.method}</p>
           </motion.div>
         ))}
       </motion.div>
 
-      <motion.div variants={fadeUp} className="bg-[#2E382E] rounded-lg px-4 py-3 mt-3 mb-2">
-        <p className="text-sm text-gold font-bold">
+      <motion.div variants={fadeUp} className="bg-[#2E382E] rounded-lg px-6 py-4 mt-6">
+        <p className="text-base text-gold font-bold">
           初步實測：覆核時間從 30 分鐘降至 10 分鐘（賀云測試 5 份報告）
         </p>
       </motion.div>
