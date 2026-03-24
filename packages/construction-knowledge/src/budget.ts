@@ -15,6 +15,16 @@ function getBudgetRangePerPing(buildingType: ProjectType): BudgetRange {
       return { min: 150000, max: 250000 };   // 老屋(40年) 15-25 萬/坪（含設計）
     case "partial":
       return { min: 50000, max: 100000 };    // 局部裝修 5-10 萬/坪
+    case "commercial":
+      return { min: 120000, max: 250000 };   // 商業空間 12-25 萬/坪（含消防/通風/無障礙）
+    case "retail":
+      return { min: 150000, max: 350000 };   // 專櫃 15-35 萬/坪（百貨規範+短工期）
+    case "restaurant":
+      return { min: 200000, max: 400000 };   // 餐廳 20-40 萬/坪（廚房設備+排氣+防水）
+    case "raw":
+      return { min: 150000, max: 300000 };   // 毛胚屋 15-30 萬/坪（全室基礎內裝）
+    case "office":
+      return { min: 100000, max: 220000 };   // 辦公大樓 10-22 萬/坪（隔間+弱電+空調）
   }
 }
 

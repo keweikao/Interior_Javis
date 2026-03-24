@@ -45,10 +45,10 @@ export function OverrideDialog({ alert, open, onClose, onSubmit }: OverrideDialo
       >
         <DialogHeader>
           <DialogTitle className="text-base font-semibold text-[#2A2A2A]">
-            覆寫風險提醒
+            專業判斷
           </DialogTitle>
           <DialogDescription className="text-sm text-[#8A8580]">
-            您即將覆寫以下風險提醒，請說明原因。
+            您即將以專業判斷處理以下風險提醒，請說明原因。
           </DialogDescription>
         </DialogHeader>
 
@@ -71,13 +71,13 @@ export function OverrideDialog({ alert, open, onClose, onSubmit }: OverrideDialo
               htmlFor="override-reason"
               className="text-xs font-medium uppercase tracking-widest text-[#B5B0AA]"
             >
-              覆寫原因
+              判斷原因
             </label>
             <textarea
               id="override-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="請說明為何覆寫此風險提醒..."
+              placeholder="請說明您的專業判斷依據..."
               rows={3}
               className="w-full text-sm p-3 rounded-md bg-white resize-y"
               style={{
@@ -105,7 +105,7 @@ export function OverrideDialog({ alert, open, onClose, onSubmit }: OverrideDialo
               transition-colors cursor-pointer
             "
           >
-            確認覆寫
+            確認判斷
           </button>
         </DialogFooter>
       </DialogContent>

@@ -35,6 +35,11 @@ const PROJECT_TYPE_LABELS: Record<string, string> = {
   mid_age: '中古屋翻新',
   old_renovation: '老屋翻新',
   partial: '局部裝修',
+  raw: '毛胚屋',
+  commercial: '商業空間',
+  retail: '專櫃',
+  restaurant: '餐廳',
+  office: '辦公大樓',
 };
 
 function formatCurrency(value: number): string {
@@ -375,7 +380,7 @@ export function RiskReportPDF({
         {overrides.length > 0 && (
           <View>
             <View style={styles.sectionHeader}>
-              <Text>設計師覆寫紀錄</Text>
+              <Text>設計師專業判斷紀錄</Text>
             </View>
             {overrides.map((ov, idx) => (
               <View key={ov.ruleId} style={styles.overrideEntry}>
@@ -383,7 +388,7 @@ export function RiskReportPDF({
                   {idx + 1}. {ov.alertTitle || ov.ruleId}
                 </Text>
                 <Text style={styles.overrideReason}>
-                  覆寫原因：{ov.reason}
+                  判斷原因：{ov.reason}
                 </Text>
               </View>
             ))}

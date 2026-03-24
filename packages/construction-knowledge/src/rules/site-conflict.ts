@@ -84,4 +84,51 @@ export const siteConflictRules: SiteConflictRule[] = [
       return hasCeilingOrPaint && mentionsHighCeiling && !hasScaffolding;
     },
   },
+  // ── 專櫃：百貨施工時段 ──
+  {
+    id: "site-retail-001",
+    severity: "warning",
+    title: "專櫃施工需確認百貨夜間施工加價",
+    why: "百貨施工通常限閉店後夜間進行，夜間人工成本加 30-50%，未計入會造成嚴重虧損",
+    suggestion: "請確認百貨施工時段，並將夜間施工加價（約 30-50%）納入報價",
+    check: (_items, site) => {
+      return site.buildingType === "retail";
+    },
+  },
+  // ── 餐廳：排煙管道 ──
+  {
+    id: "site-rest-001",
+    severity: "warning",
+    title: "餐廳需確認排煙管道路徑及大樓共用管道容量",
+    why: "排油煙管需連接至大樓排煙系統，管道路徑受限或共用管道容量不足會導致排煙效果差，營業後才發現成本極高",
+    suggestion: "施工前請確認大樓排煙管道位置、可用容量及管路距離",
+    check: (_items, site) => {
+      return site.buildingType === "restaurant";
+    },
+  },
+  // ── 毛胚屋：全室基礎內裝 ──
+  {
+    id: "site-raw-001",
+    severity: "warning",
+    title: "毛胚屋需大量泥作及油漆預算",
+    why: "毛胚屋牆面地面皆未整平粉光，全室泥作（整平/粉光）+ 油漆（批土/底漆/面漆）為最大宗基礎工程，常被低估",
+    suggestion: "請確認泥作及油漆工項已涵蓋全室面積，毛胚屋此兩項通常佔總預算 25-35%",
+    check: (items, site) => {
+      if (site.buildingType !== "raw") return false;
+      const hasMasonry = items.some((item) => item.category === "masonry");
+      const hasPainting = items.some((item) => item.category === "painting");
+      return !hasMasonry || !hasPainting;
+    },
+  },
+  // ── 辦公大樓：管委會 ──
+  {
+    id: "site-office-001",
+    severity: "warning",
+    title: "辦公大樓施工需提前申請管委會許可",
+    why: "商辦大樓通常有施工時段限制、貨梯預約、保證金等要求，未提前申請會延誤開工",
+    suggestion: "請確認大樓管委會施工申請流程、施工時段限制及保證金金額",
+    check: (_items, site) => {
+      return site.buildingType === "office";
+    },
+  },
 ];

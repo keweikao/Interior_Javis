@@ -42,6 +42,11 @@ const PROJECT_TYPE_LABELS: Record<string, string> = {
   mid_age: '中古屋翻新',
   old_renovation: '老屋翻新',
   partial: '局部裝修',
+  raw: '毛胚屋',
+  commercial: '商業空間',
+  retail: '專櫃',
+  restaurant: '餐廳',
+  office: '辦公大樓',
 };
 
 const CHINESE_NUMBERS = [

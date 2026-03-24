@@ -15,7 +15,16 @@ export type TradeCategory =
   | "transport"
   | "other";
 
-export type ProjectType = "new_build" | "mid_age" | "old_renovation" | "partial";
+export type ProjectType =
+  | "new_build"
+  | "mid_age"
+  | "old_renovation"
+  | "partial"
+  | "commercial"
+  | "retail"
+  | "restaurant"
+  | "raw"
+  | "office";
 
 export interface SiteCondition {
   totalArea: number;

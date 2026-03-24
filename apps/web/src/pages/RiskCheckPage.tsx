@@ -212,7 +212,7 @@ export default function RiskCheckPage() {
                                 onClick={() => handleOverride(alert)}
                                 className="px-3 py-1.5 rounded text-xs font-medium border border-[#B8763E] text-[#B8763E] hover:bg-[#B8763E] hover:text-white transition-colors cursor-pointer"
                               >
-                                覆寫
+                                專業判斷
                               </button>
                             )}
                           </div>

@@ -178,4 +178,71 @@ export const quantityRules: QuantityRule[] = [
       return { triggered: false, relatedItemIds: [] };
     },
   },
+  // ── 餐廳：廚房迴路數 ──
+  {
+    id: "qty-rest-001",
+    severity: "warning",
+    title: "餐廳廚房電迴路數可能不足",
+    why: "商業廚房設備（烤箱、炸爐、冷藏設備等）用電量大，至少需 3 組獨立迴路，否則同時啟動會跳電",
+    suggestion: "請確認廚房獨立迴路數至少 3 組（大型設備各 1 迴路），並與一般照明迴路分開",
+    check: (items, site) => {
+      if (site.buildingType !== "restaurant") return { triggered: false, relatedItemIds: [] };
+
+      const circuitItems = items.filter(
+        (item) =>
+          item.category === "plumbing" &&
+          (item.itemName.includes("迴路") || item.itemName.includes("回路")),
+      );
+      if (circuitItems.length === 0) return { triggered: false, relatedItemIds: [] };
+
+      const totalCircuits = circuitItems.reduce(
+        (sum, item) => sum + (item.quantity ?? 0),
+        0,
+      );
+      if (totalCircuits === 0) return { triggered: false, relatedItemIds: [] };
+
+      // 餐廳至少需 12 迴路（廚房 3+、空調 2+、照明 2+、插座 2+、備用 3）
+      if (totalCircuits < 12) {
+        return {
+          triggered: true,
+          relatedItemIds: circuitItems.map((item) => item.id),
+        };
+      }
+      return { triggered: false, relatedItemIds: [] };
+    },
+  },
+  // ── 餐廳：廚房防水 ──
+  {
+    id: "qty-rest-002",
+    severity: "warning",
+    title: "餐廳廚房防水面積可能不足",
+    why: "商業廚房地面全天接觸水和油，防水應覆蓋全廚房地坪及牆面下半部，不做等於樓下漏水",
+    suggestion: "請確認廚房防水面積涵蓋全廚房地坪及牆面至少 30cm 高",
+    check: (items, site) => {
+      if (site.buildingType !== "restaurant") return { triggered: false, relatedItemIds: [] };
+
+      const hasKitchen = items.some(
+        (item) =>
+          item.itemName.includes("廚房") ||
+          item.itemName.includes("爐台") ||
+          item.itemName.includes("中島"),
+      );
+      if (!hasKitchen) return { triggered: false, relatedItemIds: [] };
+
+      const hasWaterproof = items.some(
+        (item) =>
+          item.category === "waterproofing" &&
+          (item.itemName.includes("廚房") || item.itemName.includes("全區")),
+      );
+      if (!hasWaterproof) {
+        return {
+          triggered: true,
+          relatedItemIds: items
+            .filter((item) => item.itemName.includes("廚房"))
+            .map((item) => item.id),
+        };
+      }
+      return { triggered: false, relatedItemIds: [] };
+    },
+  },
 ];

@@ -12,6 +12,11 @@ const PROJECT_TYPE_OPTIONS: { value: ProjectType; label: string }[] = [
   { value: 'mid_age', label: '中古屋翻新' },
   { value: 'old_renovation', label: '老屋翻新' },
   { value: 'partial', label: '局部裝修' },
+  { value: 'raw', label: '毛胚屋' },
+  { value: 'commercial', label: '商業空間' },
+  { value: 'retail', label: '專櫃' },
+  { value: 'restaurant', label: '餐廳' },
+  { value: 'office', label: '辦公大樓' },
 ];
 
 function formatCurrency(value: number): string {
