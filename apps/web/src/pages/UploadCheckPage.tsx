@@ -66,6 +66,8 @@ function parsedItemToQuotationItem(
     includes: null,
     excludes: null,
     specification: item.specification,
+    costPrice: null,
+    profitMargin: null,
   };
 }
 
@@ -232,6 +234,7 @@ export default function UploadCheckPage() {
   };
 
   const handleImportToEditor = () => {
+    store.setProjectName(fileName.replace('.pdf', ''));
     store.setSiteCondition(siteCondition);
     store.setProjectType(projectType);
     store.clearItems();

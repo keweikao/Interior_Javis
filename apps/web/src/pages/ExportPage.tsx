@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { pdf } from '@react-pdf/renderer';
 import { useQuotationStore } from '@/stores/quotation-store';
 import { useRiskEngine } from '@/hooks/useRiskEngine';
+import { QuotationPDF } from '@/components/QuotationPDF';
 import { RiskReportPDF } from '@/components/RiskReportPDF';
 import {
   dependencyRules,
@@ -53,11 +54,31 @@ export default function ExportPage() {
     overriddenRules: overrides.length,
   };
 
-  function handleDownloadQuotation() {
-    const a = document.createElement('a');
-    a.href = 'https://q-check-demo.pages.dev/demo-quotation.pdf';
-    a.download = `報價單_${projectName}_${new Date().toISOString().split('T')[0]}.pdf`;
-    a.click();
+  const [downloadingQuotation, setDownloadingQuotation] = useState(false);
+
+  async function handleDownloadQuotation() {
+    setDownloadingQuotation(true);
+    try {
+      const blob = await pdf(
+        <QuotationPDF
+          projectName={projectName}
+          siteCondition={siteCondition}
+          projectType={projectType}
+          items={items}
+          totalAmount={totalAmount}
+        />
+      ).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `報價單_${projectName}_${new Date().toISOString().split('T')[0]}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Quotation PDF generation failed:', err);
+    } finally {
+      setDownloadingQuotation(false);
+    }
   }
 
   async function handleDownloadReport() {
@@ -153,10 +174,10 @@ export default function ExportPage() {
           </div>
           <button
             onClick={handleDownloadQuotation}
-            disabled={validItems.length === 0}
+            disabled={downloadingQuotation || validItems.length === 0}
             className="mt-6 w-full py-3 rounded-md text-sm font-semibold bg-primary text-primary-foreground hover:bg-[#9A6232] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            下載報價單 PDF
+            {downloadingQuotation ? '產生中...' : '下載報價單 PDF'}
           </button>
         </div>
 

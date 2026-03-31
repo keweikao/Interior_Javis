@@ -5,6 +5,7 @@ import {
   View,
   StyleSheet,
 } from '@react-pdf/renderer';
+import { PDF_FONT_FAMILY } from '@/lib/pdf-fonts';
 import type {
   QuotationItem,
   SiteCondition,
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    fontFamily: 'Helvetica',
+    fontFamily: PDF_FONT_FAMILY,
     lineHeight: 1.6,
   },
   title: {
