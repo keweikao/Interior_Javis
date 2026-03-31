@@ -46,6 +46,8 @@ export interface QuotationItem {
   includes: string | null;
   excludes: string | null;
   specification: string | null;
+  costPrice: number | null;
+  profitMargin: number | null;
 }
 
 export interface TemplateItem {

@@ -41,9 +41,9 @@ const roles = [
 
 function ItemList({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-0.5">
+    <ul className="space-y-1">
       {items.map((item) => (
-        <li key={item} className="text-[12px] text-cream leading-snug">{item}</li>
+        <li key={item} className="text-sm text-cream leading-snug">{item}</li>
       ))}
     </ul>
   )
@@ -58,20 +58,20 @@ export function Slide05VPC() {
       variants={stagger}
       initial="hidden"
       animate="visible"
-      className="w-full h-full flex flex-col justify-start px-14 pt-10 pb-12"
+      className="w-full h-full flex flex-col justify-start px-[6%] pt-[4%] pb-[3%]"
     >
       <SectionLabel text="價值主張畫布" />
-      <motion.h2 variants={fadeUp} className="text-2xl font-bold mt-2 mb-4">
+      <motion.h2 variants={fadeUp} className="text-4xl font-bold mt-3 mb-5">
         三個角色的價值互相增強
       </motion.h2>
 
       {/* Tabs */}
-      <motion.div variants={fadeUp} className="flex gap-3 mb-4">
+      <motion.div variants={fadeUp} className="flex gap-3 mb-5">
         {roles.map((r, i) => (
           <button
             key={r.id}
             onClick={(e) => { e.stopPropagation(); setActive(i) }}
-            className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+            className={`px-6 py-2.5 rounded-lg text-base font-bold transition-all ${
               i === active ? r.activeClass : 'bg-card text-cream-dim hover:text-cream'
             }`}
           >
@@ -88,30 +88,25 @@ export function Slide05VPC() {
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="flex-1 flex gap-5 items-stretch min-h-0"
+          className="flex-1 flex gap-6 items-stretch min-h-0"
         >
           {/* LEFT: Value Map (Square) */}
           <div className="flex-1 relative">
             <div className="absolute inset-0 rounded-2xl border-2 border-gold/30" />
-            <div className="relative h-full p-4 flex flex-col">
-              <p className="text-xs font-bold text-gold mb-3 tracking-wider">價值主張</p>
+            <div className="relative h-full p-5 flex flex-col">
+              <p className="text-sm font-bold text-gold mb-3 tracking-wider">價值主張</p>
 
-              <div className="grid grid-rows-3 gap-2 flex-1">
-                {/* Products & Services */}
-                <div className="bg-card/60 rounded-xl p-3">
-                  <p className="text-[11px] font-bold text-gold mb-2">產品與服務</p>
+              <div className="grid grid-rows-3 gap-3 flex-1">
+                <div className="bg-card/60 rounded-xl p-4">
+                  <p className="text-sm font-bold text-gold mb-2">產品與服務</p>
                   <ItemList items={role.products} />
                 </div>
-
-                {/* Pain Relievers */}
-                <div className="bg-card/60 rounded-xl p-3">
-                  <p className="text-[11px] font-bold text-terra mb-2">怎麼減少痛苦</p>
+                <div className="bg-card/60 rounded-xl p-4">
+                  <p className="text-sm font-bold text-terra mb-2">怎麼減少痛苦</p>
                   <ItemList items={role.relievers} />
                 </div>
-
-                {/* Gain Creators */}
-                <div className="bg-card/60 rounded-xl p-3">
-                  <p className="text-[11px] font-bold text-sage mb-2">怎麼創造收穫</p>
+                <div className="bg-card/60 rounded-xl p-4">
+                  <p className="text-sm font-bold text-sage mb-2">怎麼創造收穫</p>
                   <ItemList items={role.creators} />
                 </div>
               </div>
@@ -120,35 +115,27 @@ export function Slide05VPC() {
 
           {/* Connector arrow */}
           <div className="flex items-center">
-            <div className="w-8 h-px bg-gold/40 relative">
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-l-[6px] border-l-gold/40 border-y-[4px] border-y-transparent" />
+            <div className="w-10 h-px bg-gold/40 relative">
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-l-[8px] border-l-gold/40 border-y-[5px] border-y-transparent" />
             </div>
           </div>
 
           {/* RIGHT: Customer Profile (Circle) */}
           <div className="flex-1 relative flex items-center justify-center">
-            {/* Outer circle */}
             <div className="absolute inset-2 rounded-full border-2 border-cream-dim/20" />
-
-            <div className="relative w-full h-full p-5 flex flex-col justify-center">
-              <p className="text-xs font-bold text-gold mb-3 tracking-wider text-center">顧客輪廓</p>
-
-              <div className="space-y-2 max-w-[380px] mx-auto">
-                {/* Customer Jobs */}
-                <div className="bg-card/60 rounded-xl p-3">
-                  <p className="text-[11px] font-bold text-gold mb-2">顧客任務</p>
+            <div className="relative w-full h-full p-6 flex flex-col justify-center">
+              <p className="text-sm font-bold text-gold mb-3 tracking-wider text-center">顧客輪廓</p>
+              <div className="space-y-3 max-w-[420px] mx-auto">
+                <div className="bg-card/60 rounded-xl p-4">
+                  <p className="text-sm font-bold text-gold mb-2">顧客任務</p>
                   <ItemList items={role.jobs} />
                 </div>
-
-                {/* Pains */}
-                <div className="bg-card/60 rounded-xl p-3">
-                  <p className="text-[11px] font-bold text-terra mb-2">痛點</p>
+                <div className="bg-card/60 rounded-xl p-4">
+                  <p className="text-sm font-bold text-terra mb-2">痛點</p>
                   <ItemList items={role.pains} />
                 </div>
-
-                {/* Gains */}
-                <div className="bg-card/60 rounded-xl p-3">
-                  <p className="text-[11px] font-bold text-sage mb-2">期望收穫</p>
+                <div className="bg-card/60 rounded-xl p-4">
+                  <p className="text-sm font-bold text-sage mb-2">期望收穫</p>
                   <ItemList items={role.gains} />
                 </div>
               </div>
@@ -157,7 +144,7 @@ export function Slide05VPC() {
         </motion.div>
       </AnimatePresence>
 
-      <motion.p variants={fadeUp} className="text-sm text-gold font-medium mt-3 mb-2 text-center">
+      <motion.p variants={fadeUp} className="text-base text-gold font-medium mt-4 mb-2 text-center">
         三者互相增強：年輕人底氣提升 → 資深覆核減少 → 老闆產能提升
       </motion.p>
     </motion.div>

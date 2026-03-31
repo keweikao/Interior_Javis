@@ -5,6 +5,7 @@ import {
   View,
   StyleSheet,
 } from '@react-pdf/renderer';
+import { PDF_FONT_FAMILY } from '@/lib/pdf-fonts';
 import type {
   QuotationItem,
   SiteCondition,
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 9,
-    fontFamily: 'Helvetica',
+    fontFamily: PDF_FONT_FAMILY,
     lineHeight: 1.5,
   },
   // Header
@@ -401,12 +402,31 @@ export function RiskReportPDF({
             <View style={styles.sectionHeader}>
               <Text>未處理的提醒</Text>
             </View>
-            {alerts.map((alert) => (
-              <View key={alert.id} style={styles.alertEntry}>
-                <Text style={styles.alertTitle}>{alert.title}</Text>
-                <Text style={styles.alertWhy}>{alert.why}</Text>
-              </View>
-            ))}
+            {alerts.map((alert) => {
+              const relatedItems = alert.relatedItemIds.length > 0
+                ? items.filter((i) => alert.relatedItemIds.includes(i.id))
+                : [];
+              return (
+                <View key={alert.id} style={styles.alertEntry}>
+                  <Text style={styles.alertTitle}>{alert.title}</Text>
+                  <Text style={styles.alertWhy}>{alert.why}</Text>
+                  {relatedItems.length > 0 && (
+                    <View style={{ marginTop: 3, paddingLeft: 8 }}>
+                      {relatedItems.map((ri) => (
+                        <Text key={ri.id} style={{ fontSize: 7, color: '#8A6600' }}>
+                          {ri.itemName}
+                          {ri.quantity != null && ri.unitPrice != null
+                            ? ` — ${ri.quantity} × ${formatCurrency(ri.unitPrice)} = ${formatCurrency((ri.quantity ?? 0) * (ri.unitPrice ?? 0))}`
+                            : ri.quantity != null
+                              ? ` — 數量: ${ri.quantity}`
+                              : ''}
+                        </Text>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              );
+            })}
           </View>
         )}
 

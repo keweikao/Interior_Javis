@@ -82,17 +82,19 @@ export const useQuotationStore = create<QuotationStore>()(
         }),
       updateItem: (id, updates) =>
         set((state) => {
-          const items = state.items.map((item) =>
-            item.id === id
-              ? {
-                  ...item,
-                  ...updates,
-                  totalPrice:
-                    (updates.quantity ?? item.quantity ?? 0) *
-                    (updates.unitPrice ?? item.unitPrice ?? 0),
-                }
-              : item
-          );
+          const items = state.items.map((item) => {
+            if (item.id !== id) return item;
+            const merged = { ...item, ...updates };
+            // Auto-compute unitPrice from costPrice × profitMargin
+            const cost = merged.costPrice;
+            const margin = merged.profitMargin;
+            if (cost != null && cost > 0 && margin != null && margin > 0) {
+              merged.unitPrice = Math.round(cost * margin);
+            }
+            merged.totalPrice =
+              (merged.quantity ?? 0) * (merged.unitPrice ?? 0);
+            return merged;
+          });
           return { items, totalAmount: computeTotal(items) };
         }),
       removeItem: (id) =>

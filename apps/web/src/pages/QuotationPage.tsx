@@ -32,6 +32,8 @@ function parsedItemToQuotationItem(
     includes: null,
     excludes: null,
     specification: item.specification,
+    costPrice: null,
+    profitMargin: null,
   };
 }
 
@@ -115,6 +117,8 @@ function templateToItem(template: TemplateItem, index: number) {
     includes: template.defaultIncludes || null,
     excludes: template.defaultExcludes || null,
     specification: template.description || null,
+    costPrice: null,
+    profitMargin: null,
   };
 }
 
@@ -256,6 +260,8 @@ export default function QuotationPage() {
       includes: null,
       excludes: null,
       specification: null,
+      costPrice: null,
+      profitMargin: null,
     });
   }, [addItem]);
 
@@ -278,8 +284,13 @@ export default function QuotationPage() {
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Project header */}
         <div className="mb-5">
-          <h1 className="text-xl font-semibold text-[#2A2A2A] tracking-tight">
-            {store.projectName || '未命名案件'}
+          <h1 className="text-xl font-semibold text-[#2A2A2A] tracking-tight flex items-center">
+            <input
+              className="bg-transparent border-0 border-b border-transparent hover:border-[#E8E4DF] focus:border-[#B8763E] focus:outline-none focus:ring-0 text-xl font-semibold text-[#2A2A2A] tracking-tight px-1 py-0 min-w-[120px] max-w-[280px]"
+              value={store.projectName}
+              onChange={(e) => store.setProjectName(e.target.value)}
+              placeholder="未命名案件"
+            />
             <span className="text-[#8A8580] font-normal mx-2">/</span>
             <span className="text-[#8A8580] font-normal text-base">
               {PROJECT_TYPE_LABELS[projectType] ?? projectType}
@@ -407,13 +418,31 @@ export default function QuotationPage() {
 
         {/* Total bar - sticky bottom */}
         <div
-          className="mt-auto px-5 py-4 flex justify-end items-center gap-5 bg-white"
+          className="mt-auto px-5 py-4 bg-white"
           style={{
             borderTop: '1px solid #E8E4DF',
             position: 'sticky',
             bottom: 0,
           }}
         >
+          {/* Empty field warnings */}
+          {(() => {
+            const namedItems = items.filter((i) => !!i.itemName);
+            const missingQty = namedItems.filter((i) => i.quantity == null || i.quantity <= 0);
+            const missingPrice = namedItems.filter((i) => i.unitPrice == null || i.unitPrice <= 0);
+            if (missingQty.length === 0 && missingPrice.length === 0) return null;
+            return (
+              <div className="mb-3 px-1 text-xs text-[#D49028] space-y-0.5">
+                {missingQty.length > 0 && (
+                  <p>缺少數量：{missingQty.map((i) => i.itemName).join('、')}</p>
+                )}
+                {missingPrice.length > 0 && (
+                  <p>缺少單價：{missingPrice.map((i) => i.itemName).join('、')}</p>
+                )}
+              </div>
+            );
+          })()}
+          <div className="flex justify-end items-center gap-5">
           <span className="text-sm text-[#8A8580]">總金額</span>
           <span className="text-xl font-bold text-[#B8763E] tabular-nums tracking-tight">
             {formatCurrency(totalAmount)}
@@ -434,6 +463,7 @@ export default function QuotationPage() {
           >
             風險檢查
           </button>
+          </div>
         </div>
       </div>
 
@@ -516,10 +546,12 @@ function CategoryGroup({
       </div>
 
       {/* Table header */}
-      <div className="grid grid-cols-[1fr_60px_80px_100px_100px_80px] px-4 py-2 text-xs font-medium text-[#B5B0AA] uppercase tracking-wider border-b border-[#E8E4DF]">
+      <div className="grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_80px] px-4 py-2 text-xs font-medium text-[#B5B0AA] uppercase tracking-wider border-b border-[#E8E4DF]">
         <span>工項名稱</span>
         <span className="text-center">單位</span>
         <span className="text-right">數量</span>
+        <span className="text-right">成本價</span>
+        <span className="text-right">利潤</span>
         <span className="text-right">單價</span>
         <span className="text-right">小計</span>
         <span className="text-center">操作</span>
@@ -558,7 +590,7 @@ function ItemRow({
 
   return (
     <>
-      <div className="group grid grid-cols-[1fr_60px_80px_100px_100px_80px] items-center px-4 py-2.5 border-b border-[#E8E4DF] last:border-b-0 hover:bg-[#FDFCFA] transition-colors duration-100">
+      <div className="group grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_80px] items-center px-4 py-2.5 border-b border-[#E8E4DF] last:border-b-0 hover:bg-[#FDFCFA] transition-colors duration-100">
         {/* Item name with category select */}
         <div className="flex items-center gap-2 min-w-0">
           <select
@@ -619,10 +651,39 @@ function ItemRow({
           placeholder="0"
         />
 
-        {/* Unit price */}
+        {/* Cost price (原始報價) */}
         <input
           type="number"
           className="h-7 text-right text-sm w-full bg-transparent border-0 border-b border-transparent hover:border-[#E8E4DF] focus:border-[#B8763E] focus:outline-none focus:ring-0 px-1 tabular-nums"
+          min="0"
+          max="99999999"
+          value={item.costPrice ?? ''}
+          onChange={(e) => {
+            const val = e.target.value ? Number(e.target.value) : null;
+            onUpdate({ costPrice: val });
+          }}
+          placeholder="-"
+        />
+
+        {/* Profit margin (利潤倍數) */}
+        <input
+          type="number"
+          className="h-7 text-right text-sm w-full bg-transparent border-0 border-b border-transparent hover:border-[#E8E4DF] focus:border-[#B8763E] focus:outline-none focus:ring-0 px-1 tabular-nums"
+          min="0"
+          max="10"
+          step="0.1"
+          value={item.profitMargin ?? ''}
+          onChange={(e) => {
+            const val = e.target.value ? Number(e.target.value) : null;
+            onUpdate({ profitMargin: val });
+          }}
+          placeholder="-"
+        />
+
+        {/* Unit price (自動算或手動) */}
+        <input
+          type="number"
+          className={`h-7 text-right text-sm w-full bg-transparent border-0 border-b border-transparent hover:border-[#E8E4DF] focus:border-[#B8763E] focus:outline-none focus:ring-0 px-1 tabular-nums ${item.costPrice && item.profitMargin ? 'text-[#8A8580]' : ''}`}
           min="0"
           max="99999999"
           value={item.unitPrice ?? ''}
@@ -632,6 +693,7 @@ function ItemRow({
             onUpdate({ unitPrice: validated });
           }}
           placeholder="0"
+          title={item.costPrice && item.profitMargin ? `${item.costPrice} × ${item.profitMargin} = ${item.unitPrice}` : ''}
         />
 
         {/* Subtotal */}

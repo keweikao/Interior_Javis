@@ -33,7 +33,6 @@ export default function ExportPage() {
   const { items, siteCondition, projectType, totalAmount, overrides } =
     useQuotationStore();
   const alerts = useRiskEngine(items, siteCondition, overrides);
-  const [downloadingQuotation, setDownloadingQuotation] = useState(false);
   const [downloadingReport, setDownloadingReport] = useState(false);
 
   const projectName = useQuotationStore((s) => s.projectName) || '未命名案件';
@@ -55,6 +54,8 @@ export default function ExportPage() {
     overriddenRules: overrides.length,
   };
 
+  const [downloadingQuotation, setDownloadingQuotation] = useState(false);
+
   async function handleDownloadQuotation() {
     setDownloadingQuotation(true);
     try {
@@ -74,7 +75,7 @@ export default function ExportPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('PDF generation failed:', err);
+      console.error('Quotation PDF generation failed:', err);
     } finally {
       setDownloadingQuotation(false);
     }
